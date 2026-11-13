@@ -1,2 +1,2 @@
-c1a1099d8c4c62219dce9c2c160ab4686d47a8773de3ee6a4909a236b2040764  dsh-purge-community-1.6.99.tgz
-c1a1099d8c4c62219dce9c2c160ab4686d47a8773de3ee6a4909a236b2040764  dsh-purge-community.tgz
+f0ab3ceebe012547962527dbbac17979eab4150dc91dc343e786ae5648d3d322  dsh-purge-community-1.6.99.tgz
+f0ab3ceebe012547962527dbbac17979eab4150dc91dc343e786ae5648d3d322  dsh-purge-community.tgz

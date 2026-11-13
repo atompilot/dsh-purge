@@ -4,7 +4,7 @@
 
 ## 唯一安装目标
 
-- 仓库：`https://github.com/kingcharleslzy-ai/dsh-purge`
+- 仓库：`https://github.com/atompilot/dsh-purge`
 - **Plugin path (optional)：`.`**
 - manifest：`package.json`
 - 包名：`dsh-purge-community`
