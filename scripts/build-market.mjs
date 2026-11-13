@@ -3,7 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { execFileSync } from "node:child_process";
 import { pathToFileURL } from "node:url";
-const repo = "kingcharleslzy-ai/dsh-purge";
+const repo = "atompilot/dsh-purge";
 export function buildMarket(releases, git = (args) => execFileSync("git", args, { encoding: "utf8" }).trim()) {
   const versions = releases.filter((r) => !r.draft && !r.prerelease && /^v1\.(?:[7-9]|[1-9]\d)\.\d+$|^v1\.6\.(?:[5-9]|[1-9]\d)$|^v[2-9]\d*\.\d+\.\d+$/.test(r.tag_name))
     .map((r) => {
@@ -20,7 +20,7 @@ export function buildMarket(releases, git = (args) => execFileSync("git", args, 
     }).filter(Boolean).sort((a,b) => b.publishTimestamp-a.publishTimestamp);
   if (!versions.length) throw Error("No published market-qualified release (>=1.6.5)");
   return { format: 1, title: { en: "dsh-purge Community", zh: "dsh-purge Community 插件源" },
-    description: { en: "Verified releases maintained by kingcharleslzy-ai.", zh: "kingcharleslzy-ai 维护的正式发行版本。" },
+    description: { en: "Verified releases maintained by atompilot.", zh: "atompilot 自建并校验的正式发行版本。" },
     plugins: [{ name: "dsh-purge-community", title: { en: "dsh-purge Community", zh: "dsh-purge Community" },
       description: { en: "Host-policy patches, prompt/rule management, diagnostics, verified updates, and local backup/rollback.", zh: "宿主策略补丁、提示词与规则管理、诊断、校验更新和本机备份回滚。" },
       author: "kingcharleslzy-ai; original dsh-purge by YuJunZhiXue",

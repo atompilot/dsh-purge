@@ -74,11 +74,11 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/kingcharleslzy-ai/dsh-purge.git"
+    "url": "git+https://github.com/atompilot/dsh-purge.git"
   },
-  "homepage": "https://github.com/kingcharleslzy-ai/dsh-purge#readme",
+  "homepage": "https://github.com/atompilot/dsh-purge#readme",
   "bugs": {
-    "url": "https://github.com/kingcharleslzy-ai/dsh-purge/issues"
+    "url": "https://github.com/atompilot/dsh-purge/issues"
   },
   "dsh": {
     "bundle": {
@@ -97,8 +97,8 @@
     },
     "install": {
       "preferred": "tarball",
-      "tarball": "https://github.com/kingcharleslzy-ai/dsh-purge/releases/download/v1.6.99/dsh-purge-community-1.6.99.tgz",
-      "git": "https://github.com/kingcharleslzy-ai/dsh-purge.git"
+      "tarball": "https://github.com/atompilot/dsh-purge/releases/download/v1.6.99/dsh-purge-community-1.6.99.tgz",
+      "git": "https://github.com/atompilot/dsh-purge.git"
     },
     "compatibility": {
       "dsh": ">=0.2.1-rc.1 <0.3.0",

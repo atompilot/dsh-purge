@@ -25,6 +25,8 @@ test('each release uses its own declared compatibility; historical absence keeps
 test("the install manifest pins the package archive to its own release tag", async () => {
   const {readFile} = await import("node:fs/promises");
   const pkg = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8"));
+  // 从自己的 repository 推导，fork 换信任根后不用再改断言。
+  const repo = pkg.repository.url.replace(/^git\+/, "").replace(/\.git$/, "");
   assert.equal(pkg.dsh.install.tarball,
-    `https://github.com/kingcharleslzy-ai/dsh-purge/releases/download/v${pkg.version}/${pkg.name}-${pkg.version}.tgz`);
+    `${repo}/releases/download/v${pkg.version}/${pkg.name}-${pkg.version}.tgz`);
 });
