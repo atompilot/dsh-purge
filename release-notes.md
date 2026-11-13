@@ -1,3 +1,11 @@
+# 1.7.11
+
+- **调优设置完整性（#221）**：`tuning.json` 损坏或不可读时不再回落到默认值并在下次保存时覆盖原件；只有文件缺失才使用默认值。CLI 与设置接口报告读取错误、保留损坏原件，错误信息不包含文件内容。同一 profile 的并发修改报告占用；有效配置中的未知字段继续保留。
+- **统一原子写入**：维护数据与调优设置共用同步原子写入，私有文件保留 0600、目录 0700，目标临时占用时有限重试，失败清理临时文件；普通配置保留原权限，macOS 已有符号链接保留。
+- **版本号改为 1.7.x**：不再使用 `1.6.100` 这类三段补丁号，避免第三方插件市场把版本解析错。1.6.101 及之前的宿主修复、Inspector 补丁、回退默认隐藏与设置页布局全部保留。
+
+验证：全套 640 项通过 / 29 平台跳过；构建与发行包 smoke 通过。
+
 # 1.6.101
 
 - **回退按钮默认隐藏，新增「会话外观」开关（#218 / #214）**：输入框里的 Purge 回退按钮默认不显示，已有显式开关值继续生效；面板与独立设置页都能在「更多 → 会话外观」切换，同一页面立即更新。CLI 继续读写同一个选项，切换后刷新页面即可。隐藏时仍保留草稿回填。
@@ -164,12 +172,12 @@
 
 1.6.83 未正式发行：Windows CI 的测试提取命令时只识别 LF。1.6.84 同时检查 LF 和 CRLF。
 
-Windows 从更旧版本迁移时，Defender 仍可能拦截旧包文件的完整快照；本版未修复或绕过该限制。见 [1.6.82 迁移说明](https://github.com/kingcharleslzy-ai/dsh-purge/releases/tag/v1.6.82)。
+Windows 从更旧版本迁移时，Defender 仍可能拦截旧包文件的完整快照；本版未修复或绕过该限制。见 [1.6.82 迁移说明](https://github.com/atompilot/dsh-purge/releases/tag/v1.6.82)。
 
 # 1.6.82
 
-- Windows Desktop 换包助手现在能在宿主的 Job Object 结束后继续等待。用户手动退出后，助手校验原归档、保存备份并完成换包。见 [#89](https://github.com/kingcharleslzy-ai/dsh-purge/issues/89)。
-- pnpm 工作区的 Web 实例从当前运行的 CLI 包读取实际 bin 入口。即使工作区链接解析到 `apps/cli`，升级和回滚也能找到同一个实例及 profile。见 [#93](https://github.com/kingcharleslzy-ai/dsh-purge/issues/93)。
+- Windows Desktop 换包助手现在能在宿主的 Job Object 结束后继续等待。用户手动退出后，助手校验原归档、保存备份并完成换包。见 [#89](https://github.com/atompilot/dsh-purge/issues/89)。
+- pnpm 工作区的 Web 实例从当前运行的 CLI 包读取实际 bin 入口。即使工作区链接解析到 `apps/cli`，升级和回滚也能找到同一个实例及 profile。见 [#93](https://github.com/atompilot/dsh-purge/issues/93)。
 - 随包技能 `unauth-exploit` 改用静态文本演示文件写权限，移除了文档中的可执行 WebShell 和持久化命令示例。原技能名称和工具入口继续可用。
 
 ## 已实测通过
@@ -189,7 +197,7 @@ Windows 从更旧版本迁移时，Defender 仍可能拦截旧包文件的完整
 
 使用现有渠道更新 Defender 安全情报至 1.463.137.0 后，公开旧版往返仍未在这台 Windows 机器上通过。遇到上述情况请保留错误和原备份，核对 Defender 保护历史中的时间、文件名和检测名称。维护器需要完整快照；请勿跳过文件或把残缺备份用于回滚。
 
-[完整实测记录与修复范围（PR #148）](https://github.com/kingcharleslzy-ai/dsh-purge/pull/148)
+[完整实测记录与修复范围（PR #148）](https://github.com/atompilot/dsh-purge/pull/148)
 
 # 1.6.81
 
@@ -308,7 +316,7 @@ Windows 从更旧版本迁移时，Defender 仍可能拦截旧包文件的完整
 
 感谢 @longyanbo1224-debug 提交 PR #131 的归档文档改进。
 
-本机故障文件与补丁模板先备份后修正，设置文件校验未变；用户手动重开后确认恢复，后端健康检查通过。未调用全局“禁用插件”，未自动重启。详细证据见 [运行验证记录](https://github.com/kingcharleslzy-ai/dsh-purge/blob/v1.6.74/docs/native-input-integrity.md)。
+本机故障文件与补丁模板先备份后修正，设置文件校验未变；用户手动重开后确认恢复，后端健康检查通过。未调用全局“禁用插件”，未自动重启。详细证据见 [运行验证记录](https://github.com/atompilot/dsh-purge/blob/v1.6.74/docs/native-input-integrity.md)。
 
 ---
 
@@ -354,7 +362,7 @@ Windows 从更旧版本迁移时，Defender 仍可能拦截旧包文件的完整
 - GitHub 继续执行完整回归、三平台安装器及隔离 Electron 检查；这些检查不能替代 0.2.2-rc.1 所有插件功能验收。
 - 受影响 Windows 4090 的 **Defender 完整回滚阻断仍未解决**；本版不关闭防护、不加白名单，也不声称 CI 通过就修复了该机器。#127 仍保留待确认。
 
-详见 [诊断与测试记录](https://github.com/kingcharleslzy-ai/dsh-purge/blob/v1.6.71/docs/maintenance-022-diagnostics.md)。包名、安装入口和数据目录不变，保留现有设置；不自动重启 DSH。安装包附 SHA256 校验文件。
+详见 [诊断与测试记录](https://github.com/atompilot/dsh-purge/blob/v1.6.71/docs/maintenance-022-diagnostics.md)。包名、安装入口和数据目录不变，保留现有设置；不自动重启 DSH。安装包附 SHA256 校验文件。
 
 ---
 
@@ -373,7 +381,7 @@ Windows 从更旧版本迁移时，Defender 仍可能拦截旧包文件的完整
 - 两个来源提交的 GitHub 八项检查均通过，包含三平台安装器、官方 npm 宿主升级、回滚和失败恢复。合并后的发行提交仍执行仓库完整检查与发行三平台检查，全部成功才上传安装包。
 - Mac 与 Windows 4090 的隔离 Electron 宿主诊断专项 16/16；设置迁移/API 专项在两平台 Node 与隔离 Electron 下各 8/8。Windows PowerShell 换包专项连跑三轮，每轮 7/7。
 - 上述诊断专项使用真实 Electron/Cordis 加临时 official/NEXT 布局夹具，**不代表完整 NEXT GUI、所有宿主功能或旧宿主补丁迁移已验收**。NEXT 保持 `qualified:false`，真实错误不会隐藏。
-- **已有 Defender 限制仍在**：受影响 Windows 4090 对旧版已有文件的隔离仍会阻断完整升级/回滚。本版未解决该检测，也未关闭防护、加白名单或删文件；CI 通过不等于这台机器的完整回滚恢复。详情见 [1.6.69 诊断记录](https://github.com/kingcharleslzy-ai/dsh-purge/blob/v1.6.69/docs/maintenance-integrity-169.md)。
+- **已有 Defender 限制仍在**：受影响 Windows 4090 对旧版已有文件的隔离仍会阻断完整升级/回滚。本版未解决该检测，也未关闭防护、加白名单或删文件；CI 通过不等于这台机器的完整回滚恢复。详情见 [1.6.69 诊断记录](https://github.com/atompilot/dsh-purge/blob/v1.6.69/docs/maintenance-integrity-169.md)。
 - #127 的公开依赖提供 `httpServer`，消费者需要 `webServer`，版本/别名机制待作者确认；保持开放，未合入本版。
 
 ## 提交来源与升级
@@ -399,7 +407,7 @@ Windows 从更旧版本迁移时，Defender 仍可能拦截旧包文件的完整
 
 No changes to patch definitions, feature defaults, user settings, proxy configuration or restart policy. Upstream design review informed this work; implementation and regression coverage are maintained independently. No upstream test removal or automatic application restart is adopted.
 
-See [validation and recovery](https://github.com/kingcharleslzy-ai/dsh-purge/blob/v1.6.69/docs/maintenance-integrity-169.md) for verified scope and limitations.
+See [validation and recovery](https://github.com/atompilot/dsh-purge/blob/v1.6.69/docs/maintenance-integrity-169.md) for verified scope and limitations.
 
 ---
 
@@ -418,7 +426,7 @@ See [validation and recovery](https://github.com/kingcharleslzy-ai/dsh-purge/blo
 - 两端实际隔离 Electron 44.7.0 的 apply、缺失目标与部分状态专项各 15/15；面板 26 项、UI 合约、文档和生成 bundle 一致性通过。
 - 移除修复的负对照会再次触发测试失败；同时检查默认关闭时不写入目标或创建备份，混合真实错误时保留正确失败 ID。
 
-感谢 [ShiTan-677](https://github.com/ShiTan-677) 提交 [PR #124](https://github.com/kingcharleslzy-ai/dsh-purge/pull/124)。
+感谢 [ShiTan-677](https://github.com/ShiTan-677) 提交 [PR #124](https://github.com/atompilot/dsh-purge/pull/124)。
 
 本版不包含尚未通过验证的 NEXT 适配 PR #102 或备份选项 PR #115。发行包由三平台检查通过后构建，并附 SHA256SUMS.txt；用户现有安装不会因本次发布而被维护者自动重启。
 
@@ -441,7 +449,7 @@ See [validation and recovery](https://github.com/kingcharleslzy-ai/dsh-purge/blo
 
 此版本仅修改通用更新通道和凭据保护，不变更宿主补丁、提示词或自动更新偏好；本次测试不改维护者正式 DSH 设置、代理或防护，也不自动重启。ACL 不等于加密，不能防止管理员或同一用户进程读取。
 
-[#122](https://github.com/kingcharleslzy-ai/dsh-purge/issues/122) 暂留待确认：维护者实机为 Windows 11，尚需报告者在 Windows 10 19041 / 原 Clash TUN fakeIP 环境确认修复效果。[验证与维护说明](https://github.com/kingcharleslzy-ai/dsh-purge/blob/master/docs/update-channel-122.md)
+[#122](https://github.com/atompilot/dsh-purge/issues/122) 暂留待确认：维护者实机为 Windows 11，尚需报告者在 Windows 10 19041 / 原 Clash TUN fakeIP 环境确认修复效果。[验证与维护说明](https://github.com/atompilot/dsh-purge/blob/master/docs/update-channel-122.md)
 
 # 1.6.66
 
@@ -462,7 +470,7 @@ See [validation and recovery](https://github.com/kingcharleslzy-ai/dsh-purge/blo
 
 #118 保持打开：已复现并修复的是错误分类问题，不能据此认定报告者的具体卡住原因。仍需其换包状态、错误详情和助手日志。#119 的修复限于宿主诊断，不等于 #102 所提 NEXT 桌面发行版已经完整兼容。
 
-[PR #121](https://github.com/kingcharleslzy-ai/dsh-purge/pull/121) · [验证与边界](https://github.com/kingcharleslzy-ai/dsh-purge/blob/master/docs/host-diagnostics-118-119.md)
+[PR #121](https://github.com/atompilot/dsh-purge/pull/121) · [验证与边界](https://github.com/atompilot/dsh-purge/blob/master/docs/host-diagnostics-118-119.md)
 
 # 1.6.65
 
@@ -615,7 +623,7 @@ purge-community patches disable 19       # 关掉
 
 **未纳入**：#95 现场资源损坏原因、#89 换包助手问题、PR #102 第三方桌面换包和 PR #113 Cookie/header 修改。它们继续保持开放，不将未验证宿主标记为已兼容。
 
-测试和恢复边界见 [维护记录](https://github.com/kingcharleslzy-ai/dsh-purge/blob/master/docs/maintenance-1.6.61.md)。
+测试和恢复边界见 [维护记录](https://github.com/atompilot/dsh-purge/blob/master/docs/maintenance-1.6.61.md)。
 
 ---
 
@@ -630,7 +638,7 @@ purge-community patches disable 19       # 关掉
 
 **#89 仍待确认，不在本版修复范围内。** Windows 4090 的普通启动器退出验收通过；受控 Kill-on-close Job Object 实验可复现助手退出、waiting_for_quit 残留且归档未移动。尚需报告者确认现场进程托管机制，不能把受控复现当成其现场根因已经确定。
 
-测试范围与恢复说明见 [维护记录](https://github.com/kingcharleslzy-ai/dsh-purge/blob/master/docs/maintenance-issues-86-89.md)。
+测试范围与恢复说明见 [维护记录](https://github.com/atompilot/dsh-purge/blob/master/docs/maintenance-issues-86-89.md)。
 
 ---
 
@@ -927,7 +935,7 @@ $DSH_HOME/dsh-purge/boost-order.json   →  {"order": 9500}
 
 不修改现有设置、权限配置或代理，不自动应用补丁、不退出或重启 DSH。排除只控制提示词，不撤销全局宿主补丁。旧宿主更新需要用户安排应用补丁并手动退出重开。
 
-配置与测试边界见 [维护说明](https://github.com/kingcharleslzy-ai/dsh-purge/blob/master/docs/maintenance-issue-53.md)。感谢 REALOIYO 的详细报告与方案。
+配置与测试边界见 [维护说明](https://github.com/atompilot/dsh-purge/blob/master/docs/maintenance-issue-53.md)。感谢 REALOIYO 的详细报告与方案。
 
 # 1.6.39
 
@@ -938,7 +946,7 @@ $DSH_HOME/dsh-purge/boost-order.json   →  {"order": 9500}
 
 不修改现有提示词、设置、预设、功能或代理，不自动应用补丁、不退出或重启 DSH。#52 报告者的具体网络故障仍需用新版脱敏日志确认，不能把本机通过等同于对方环境已经恢复。
 
-排查与测试边界见 [维护说明](https://github.com/kingcharleslzy-ai/dsh-purge/blob/master/docs/maintenance-issue-52.md)。
+排查与测试边界见 [维护说明](https://github.com/atompilot/dsh-purge/blob/master/docs/maintenance-issue-52.md)。
 
 # 1.6.38
 
@@ -1035,7 +1043,7 @@ npm test   239 通过 / 0 失败
 
 升级插件本身不会自动应用补丁或重启。用户在桌面 Purge 中点「应用」后，确认换包状态为“等待完整退出”，使用 **⌘Q** 完整退出；待独立诊断确认 `handoff.phase=complete` 后再手动打开 DSH。仅关闭窗口不一定退出进程。助手最多等待 30 分钟。
 
-故障时先保留状态及备份，按 [#40 维护说明](https://github.com/kingcharleslzy-ai/dsh-purge/blob/master/docs/maintenance-issue-40.md) 排查；不要删除归档、锁或修改权限来消除提示。插件包回滚与宿主归档恢复是两件事，不能用旧用户配置覆盖当前设置。
+故障时先保留状态及备份，按 [#40 维护说明](https://github.com/atompilot/dsh-purge/blob/master/docs/maintenance-issue-40.md) 排查；不要删除归档、锁或修改权限来消除提示。插件包回滚与宿主归档恢复是两件事，不能用旧用户配置覆盖当前设置。
 
 ---
 
@@ -1074,7 +1082,7 @@ npm test   含 test/refusal-retry：命中/不命中、恰好重试一次、正�
 
 验证包含三平台完整测试和发行包 smoke，Windows PowerShell 5.1/7 与真实 Electron 交接，macOS 真实 Electron 诊断。新增 Ubuntu 非 root 环境中的官方 DSH 0.2.1-rc.2 npm 宿主实测，覆盖用户副本安装、CLI 启动、插件导入、备份、回滚和失败恢复。Linux 图形界面与模型任务未全面验收，不宣称所有发行版完整兼容。
 
-感谢 [SimonQvQ](https://github.com/SimonQvQ) 的 Linux 支持与 CachyOS 验证。详细边界见 [维护记录](https://github.com/kingcharleslzy-ai/dsh-purge/blob/master/docs/maintenance-pr-42.md)。
+感谢 [SimonQvQ](https://github.com/SimonQvQ) 的 Linux 支持与 CachyOS 验证。详细边界见 [维护记录](https://github.com/atompilot/dsh-purge/blob/master/docs/maintenance-pr-42.md)。
 
 ---
 
@@ -1089,7 +1097,7 @@ npm test   含 test/refusal-retry：命中/不命中、恰好重试一次、正�
 - 增加 macOS/Windows 真实 Electron 归档与 HTTP 接口回归，继续运行三平台安装及打包检查。
 
 这次确认的是可复现的路径诊断缺陷。报告者的具体 DSH 版本和剩余红项仍需其诊断信息确认。
-详见 [维护说明](https://github.com/kingcharleslzy-ai/dsh-purge/blob/master/docs/maintenance-issue-40.md)。
+详见 [维护说明](https://github.com/atompilot/dsh-purge/blob/master/docs/maintenance-issue-40.md)。
 
 ---
 
@@ -1487,7 +1495,7 @@ Windows 交接与设置兼容修复；实机结果与边界见 [1.6.9 验收记�
 # 1.6.7
 
 - 修复 macOS 临时目录路径别名导致独立 bootstrap 入口静默跳过的问题；使用真实文件路径判断入口，并加入 symlink 启动回归。
-- 修复 [issue #7](https://github.com/kingcharleslzy-ai/dsh-purge/issues/7) 的独立安装恢复路径：公开镜像缺少 `@dsh-ops/bash-win32-x64` 指定版本元数据时，验证 npm 官方元数据后只对该 scope 重试一次。保留全部 pnpm 校验，不改变全局源、不切换私有源、不重试真实完整性/信任/发布时间错误。
+- 修复 [issue #7](https://github.com/atompilot/dsh-purge/issues/7) 的独立安装恢复路径：公开镜像缺少 `@dsh-ops/bash-win32-x64` 指定版本元数据时，验证 npm 官方元数据后只对该 scope 重试一次。保留全部 pnpm 校验，不改变全局源、不切换私有源、不重试真实完整性/信任/发布时间错误。
 - 新增 Windows PowerShell 5.1 / 7 安装入口，自动定位唯一 Desktop（可显式指定），使用应用运行时，不要求全局 Node/pnpm；参数、空格/中文路径、失败退出与进程环境恢复纳入测试。
 - macOS / Windows 共用下载、大小边界、SHA256、包身份核对与备份迁移；修复校验清单含稳定别名但未下载该别名时的误报。
 - 同步 README、中文副本、英文指南、AGENTS 与维护说明；明确市场首次安装由 DSH 执行，需选择 npm 官方源或使用独立安装器，不声称插件能接管加载前的宿主流程。
@@ -1512,12 +1520,12 @@ Windows 交接与设置兼容修复；实机结果与边界见 [1.6.9 验收记�
 
 ## 修复 issue #5：Electron ASAR 双向误判
 
-感谢 [@OGHong](https://github.com/OGHong) 在 [issue #5](https://github.com/kingcharleslzy-ai/dsh-purge/issues/5) 中提供复现与最小修复。宿主归档检查改用已有 `diskFs()`，覆盖直接调用及完整 selfCheck 入口；归档存在、缺失及权限错误分别如实显示，不通过忽略异常强行标绿，也不改全局 `process.noAsar`。
+感谢 [@OGHong](https://github.com/OGHong) 在 [issue #5](https://github.com/atompilot/dsh-purge/issues/5) 中提供复现与最小修复。宿主归档检查改用已有 `diskFs()`，覆盖直接调用及完整 selfCheck 入口；归档存在、缺失及权限错误分别如实显示，不通过忽略异常强行标绿，也不改全局 `process.noAsar`。
 
 ## 市场与安装包
 
 - 新增官方 format-1 市场索引，固定完整 Git 提交，仅展示已发布正式版本；发布成功后通过 GitHub Pages 自动部署。
-- 添加源地址：**https://kingcharleslzy-ai.github.io/dsh-purge/index.json**。启用 DSH 实验性的「自定义插件市场」后，在发现页添加。
+- 添加源地址：**https://atompilot.github.io/dsh-purge/index.json**。启用 DSH 实验性的「自定义插件市场」后，在发现页添加。
 - 兼容范围按已验证的 0.2.1 rc.1/rc.2 保守标注；第三方社区目录收录需另外审核，不冒充官方背书。
 - 附件包含版本安装包、固定名称 `dsh-purge-community.tgz` 和 SHA256SUMS.txt；固定名称方便社区目录跟随最新正式版本。
 
@@ -1527,4 +1535,4 @@ Windows 交接与设置兼容修复；实机结果与边界见 [1.6.9 验收记�
 
 本版不改宿主补丁表、提示词或现有权限选择。现有用户需手动安装/更新本版并重启一次，新的更新设置才会出现；本次发布不会自动安装到维护者或其他用户的机器。
 
-[1.6.4 发布记录](https://github.com/kingcharleslzy-ai/dsh-purge/releases/tag/v1.6.4) · [更新设置说明](https://github.com/kingcharleslzy-ai/dsh-purge/blob/v1.6.5/docs/AUTO-UPDATE.md)
+[1.6.4 发布记录](https://github.com/atompilot/dsh-purge/releases/tag/v1.6.4) · [更新设置说明](https://github.com/atompilot/dsh-purge/blob/v1.6.5/docs/AUTO-UPDATE.md)
