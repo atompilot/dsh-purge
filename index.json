@@ -1,0 +1,341 @@
+{
+  "format": 1,
+  "title": {
+    "en": "Charles DSH plugins",
+    "zh": "Charles DSH 插件源"
+  },
+  "description": {
+    "en": "Verified dsh-purge Community, DSH-Spicy and Breeze Voice releases.",
+    "zh": "Purge 社区版、DSH-Spicy以及 Breeze 语音的已校验发行版本。"
+  },
+  "plugins": [
+    {
+      "name": "dsh-purge-community",
+      "title": {
+        "en": "dsh-purge Community",
+        "zh": "dsh-purge Community"
+      },
+      "description": {
+        "en": "Host-policy patches, prompt/rule management, diagnostics, verified updates, and local backup/rollback.",
+        "zh": "宿主策略补丁、提示词与规则管理、诊断、校验更新和本机备份回滚。"
+      },
+      "author": "kingcharleslzy-ai; original dsh-purge by YuJunZhiXue",
+      "homepage": "https://github.com/atompilot/dsh-purge#readme",
+      "repository": {
+        "url": "https://github.com/atompilot/dsh-purge"
+      },
+      "icon": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+PHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiByeD0iMTQiIGZpbGw9IiMxNjY1MzQiLz48dGV4dCB4PSIzMiIgeT0iNDUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IndoaXRlIiBmb250LXNpemU9IjQ0IiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiI+UDwvdGV4dD48L3N2Zz4=",
+      "versions": [
+        {
+          "version": "1.7.18",
+          "publishTimestamp": 1794831811,
+          "source": {
+            "type": "git",
+            "url": "https://github.com/atompilot/dsh-purge",
+            "commit": "ed6e5343d9dafb1186113bc1f25dfd5587d5ced2"
+          },
+          "engines": {
+            "dsh": ">=0.2.1-rc.1 <0.3.0"
+          }
+        },
+        {
+          "version": "1.7.11",
+          "publishTimestamp": 1794590141,
+          "source": {
+            "type": "git",
+            "url": "https://github.com/atompilot/dsh-purge",
+            "commit": "de7b29b86d7088e3ee228881226501ca56996308"
+          },
+          "engines": {
+            "dsh": ">=0.2.1-rc.1 <0.3.0"
+          }
+        },
+        {
+          "version": "1.6.99",
+          "publishTimestamp": 1794581362,
+          "source": {
+            "type": "git",
+            "url": "https://github.com/atompilot/dsh-purge",
+            "commit": "e874618c2bb1a93f2368387d3112982debeb40ed"
+          },
+          "engines": {
+            "dsh": ">=0.2.1-rc.1 <0.3.0"
+          }
+        }
+      ]
+    },
+    {
+      "name": "dsh-qwen-studio",
+      "title": "DSH-Spicy",
+      "description": {
+        "en": "An NSFW content creation plugin for purge.",
+        "zh": "完美适配 purge 的 nsfw content creation 插件"
+      },
+      "icon": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+PHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiByeD0iMTQiIGZpbGw9IiMyNDI2MmIiLz48cmVjdCB4PSIxNCIgeT0iMTQiIHdpZHRoPSIzNiIgaGVpZ2h0PSIzNiIgcng9IjciIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzkzYjRmZiIgc3Ryb2tlLXdpZHRoPSIzIi8+PGNpcmNsZSBjeD0iMjUiIGN5PSIyNSIgcj0iNCIgZmlsbD0iIzkzYjRmZiIvPjxwYXRoIGQ9Ik0xNyA0NWwxMi0xMyA4IDggNi02IDcgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzkzYjRmZiIgc3Ryb2tlLXdpZHRoPSIzIi8+PC9zdmc+",
+      "author": "kingcharleslzy-ai",
+      "homepage": "https://github.com/kingcharleslzy-ai/DSH-Spicy#readme",
+      "repository": {
+        "url": "https://github.com/kingcharleslzy-ai/DSH-Spicy"
+      },
+      "metadata": {
+        "category": "vision",
+        "labels": [
+          "video",
+          "film",
+          "skills",
+          "mlx",
+          "cuda",
+          "lora",
+          "controlnet",
+          "presets",
+          "editing"
+        ]
+      },
+      "versions": [
+        {
+          "version": "3.1.3",
+          "publishTimestamp": 1794592183,
+          "source": {
+            "type": "git",
+            "url": "https://github.com/kingcharleslzy-ai/DSH-Spicy",
+            "commit": "009a159b2dd6feb8e1e8cdbd36d82d55adb6a56f"
+          },
+          "engines": {
+            "dsh": ">=0.2.2-rc.1"
+          }
+        },
+        {
+          "version": "3.1.2",
+          "publishTimestamp": 1794590408,
+          "source": {
+            "type": "git",
+            "url": "https://github.com/kingcharleslzy-ai/DSH-Spicy",
+            "commit": "2a5f7777d4dd324f6c5b340f0095f9b6ebfe584c"
+          },
+          "engines": {
+            "dsh": ">=0.2.2-rc.1"
+          }
+        },
+        {
+          "version": "3.1.1",
+          "publishTimestamp": 1794587209,
+          "source": {
+            "type": "git",
+            "url": "https://github.com/kingcharleslzy-ai/DSH-Spicy",
+            "commit": "8f418a0260496e42d2f6550121d5e4f81c2bebea"
+          },
+          "engines": {
+            "dsh": ">=0.2.2-rc.1"
+          }
+        },
+        {
+          "version": "3.1.0",
+          "publishTimestamp": 1794584391,
+          "source": {
+            "type": "git",
+            "url": "https://github.com/kingcharleslzy-ai/DSH-Spicy",
+            "commit": "a741d68f163d2de67c4b3ad9f1becc120cf6ce61"
+          },
+          "engines": {
+            "dsh": ">=0.2.2-rc.1"
+          }
+        },
+        {
+          "version": "3.0.2",
+          "publishTimestamp": 1794580758,
+          "source": {
+            "type": "git",
+            "url": "https://github.com/kingcharleslzy-ai/DSH-Spicy",
+            "commit": "a22ffe6913cedc17f1b9fb80a33014401a82dab8"
+          },
+          "engines": {
+            "dsh": ">=0.2.2-rc.1"
+          }
+        },
+        {
+          "version": "3.0.1",
+          "publishTimestamp": 1794580182,
+          "source": {
+            "type": "git",
+            "url": "https://github.com/kingcharleslzy-ai/DSH-Spicy",
+            "commit": "26596284dfa97f91a79539640322a8453730ffa5"
+          },
+          "engines": {
+            "dsh": ">=0.2.2-rc.1"
+          }
+        },
+        {
+          "version": "3.0.0",
+          "publishTimestamp": 1794579186,
+          "source": {
+            "type": "git",
+            "url": "https://github.com/kingcharleslzy-ai/DSH-Spicy",
+            "commit": "472f01551d8a3c75a2808b4fdb808fbb7ceab1fe"
+          },
+          "engines": {
+            "dsh": ">=0.2.2-rc.1"
+          }
+        },
+        {
+          "version": "2.19.3",
+          "publishTimestamp": 1794409349,
+          "source": {
+            "type": "git",
+            "url": "https://github.com/kingcharleslzy-ai/DSH-Spicy",
+            "commit": "4c0a642b558d6b0db710075b592c8b3a3ae98201"
+          },
+          "engines": {
+            "dsh": ">=0.2.1-rc.1"
+          }
+        },
+        {
+          "version": "2.19.2",
+          "publishTimestamp": 1794059467,
+          "source": {
+            "type": "git",
+            "url": "https://github.com/kingcharleslzy-ai/DSH-Spicy",
+            "commit": "e6e51858ebfdad8ba33d564df1dd653ff71641d8"
+          },
+          "engines": {
+            "dsh": ">=0.2.1-rc.1 <0.2.2-0 || 0.2.2-rc.1"
+          }
+        },
+        {
+          "version": "2.19.1",
+          "publishTimestamp": 1793852210,
+          "source": {
+            "type": "git",
+            "url": "https://github.com/kingcharleslzy-ai/DSH-Spicy",
+            "commit": "8536f0c80db01a9a06d787e87d8f50562ff88fc2"
+          },
+          "engines": {
+            "dsh": ">=0.2.1-rc.1 <0.2.2-0 || 0.2.2-rc.1"
+          }
+        },
+        {
+          "version": "2.19.0",
+          "publishTimestamp": 1792596273,
+          "source": {
+            "type": "git",
+            "url": "https://github.com/kingcharleslzy-ai/DSH-Spicy",
+            "commit": "aad917963099d9bbf98a75c0b79f843c25f08aa2"
+          },
+          "engines": {
+            "dsh": ">=0.2.1-rc.1 <0.2.2-0"
+          }
+        },
+        {
+          "version": "2.12.0",
+          "publishTimestamp": 1792292606,
+          "source": {
+            "type": "git",
+            "url": "https://github.com/kingcharleslzy-ai/DSH-Spicy",
+            "commit": "392137160f32cd083e328fc39d07c2e6ea187f55"
+          },
+          "engines": {
+            "dsh": ">=0.2.1-rc.1 <0.2.2-0"
+          }
+        }
+      ]
+    },
+    {
+      "name": "dsh-breeze-voice",
+      "title": {
+        "en": "Breeze Voice",
+        "zh": "Breeze 语音对话"
+      },
+      "description": {
+        "en": "Talk in your current DSH conversation with speech recognition, streamed replies, and interruption.",
+        "zh": "在当前 DSH 会话内说话，识别语音、分句播放回答，随时打断。"
+      },
+      "author": "kingcharleslzy-ai",
+      "homepage": "https://github.com/kingcharleslzy-ai/dsh-breeze-voice#readme",
+      "repository": {
+        "url": "https://github.com/kingcharleslzy-ai/dsh-breeze-voice"
+      },
+      "versions": [
+        {
+          "version": "0.4.2",
+          "publishTimestamp": 1794409356,
+          "source": {
+            "type": "git",
+            "url": "https://github.com/kingcharleslzy-ai/dsh-breeze-voice",
+            "commit": "45b1ac48d50ffe286460a0882f4e7f7b3895af77"
+          },
+          "engines": {
+            "dsh": ">=0.2.1-rc.5"
+          }
+        },
+        {
+          "version": "0.4.1",
+          "publishTimestamp": 1793852218,
+          "source": {
+            "type": "git",
+            "url": "https://github.com/kingcharleslzy-ai/dsh-breeze-voice",
+            "commit": "fe7d83efd7b5306578ebf6739a4bcbb50592adcf"
+          },
+          "engines": {
+            "dsh": ">=0.2.1-rc.5 <0.2.2-0 || 0.2.2-rc.1"
+          }
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "categories": {
+      "vision": {
+        "title": {
+          "en": "Image and video",
+          "zh": "图像与视频"
+        }
+      }
+    },
+    "labels": {
+      "video": {
+        "title": "MiniMax H3"
+      },
+      "film": {
+        "title": {
+          "en": "Multi-shot film",
+          "zh": "多镜头成片"
+        }
+      },
+      "skills": {
+        "title": {
+          "en": "Agent skills",
+          "zh": "Agent 技能"
+        }
+      },
+      "mlx": {
+        "title": {
+          "en": "Apple Silicon / MLX",
+          "zh": "苹果本机 MLX"
+        }
+      },
+      "cuda": {
+        "title": {
+          "en": "Self-hosted CUDA",
+          "zh": "自部署 CUDA"
+        }
+      },
+      "lora": {
+        "title": "LoRA"
+      },
+      "controlnet": {
+        "title": "ControlNet"
+      },
+      "presets": {
+        "title": {
+          "en": "Presets",
+          "zh": "整套预设"
+        }
+      },
+      "editing": {
+        "title": {
+          "en": "Reference editing",
+          "zh": "原生参考编辑"
+        }
+      }
+    }
+  }
+}
