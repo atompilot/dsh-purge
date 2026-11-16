@@ -74,6 +74,14 @@ test('cyclic entry aliases terminate without overlooking a following legacy entr
   assert.equal(checkInstallExamples(cyclic).length, 1);
 });
 
+test('standalone installers fetch the bootstrap from this repository', () => {
+  for (const ext of ['sh', 'ps1']) {
+    const script = fs.readFileSync(new URL(`../scripts/install.${ext}`, import.meta.url), 'utf8');
+    assert.match(script, /https:\/\/raw\.githubusercontent\.com\/atompilot\/dsh-purge\/master\/scripts\/bootstrap-install\.mjs/);
+    assert.doesNotMatch(script, /kingcharleslzy-ai/);
+  }
+});
+
 test('source installation identifies a missing yaml dependency and preserves other import errors', async (t) => {
   const { tmpdir } = await import('node:os');
   const path = await import('node:path');
