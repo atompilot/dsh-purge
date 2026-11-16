@@ -5,7 +5,7 @@ for arg do
   case "$arg" in
     --help|-h)
       cat <<'HELP'
-Usage: sh scripts/install.sh [--dry-run] [--version=X.Y.Z] [--profile=NAME]
+Usage: sh scripts/install.sh [--dry-run] [--ack-welcome] [--version=X.Y.Z] [--profile=NAME]
        sh scripts/install.sh --archive=/path/package.tgz --sha256=HEX [--version=X.Y.Z]
 Linux: existing DSH CLI/Web, Node >=18, default profile web.
   PURGE_DSH_CLI selects a CLI (default: dsh on PATH); DSH_NODE selects Node.
@@ -13,6 +13,7 @@ Desktop: DSH_APP selects the executable on Linux or the .app on macOS.
   Uses the selected Desktop's Electron runtime; default profile desktop.
 DSH_HOME selects the data directory. Open DSH once to initialize the profile.
 Installation preserves settings and never applies host patches or restarts DSH.
+  --ack-welcome writes this install's first-run notice acknowledgement (explicit opt-in).
 HELP
       exit 0 ;;
   esac

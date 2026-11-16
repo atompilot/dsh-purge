@@ -5,7 +5,8 @@ param(
     [string]$DshHome = $env:DSH_HOME,
     [string]$Profile = $env:DSH_PROFILE,
     [string]$Version = $env:PURGE_VERSION,
-    [switch]$DryRun
+    [switch]$DryRun,
+    [switch]$AckWelcome
 )
 $ErrorActionPreference = 'Stop'
 function Find-DshExecutable {
@@ -54,6 +55,7 @@ try {
     if ($Profile) { $arguments += "--profile=$Profile" }
     if ($Version) { $arguments += "--version=$Version" }
     if ($DryRun) { $arguments += '--dry-run' }
+    if ($AckWelcome) { $arguments += '--ack-welcome' }
     $standardOutput = Join-Path $temporary 'stdout.log'
     $standardError = Join-Path $temporary 'stderr.log'
     $quoted = ($arguments | ForEach-Object { ConvertTo-NativeArgument $_ }) -join ' '

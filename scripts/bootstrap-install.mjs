@@ -322,7 +322,7 @@ export function prepareLinuxHost(cli, { userHome = os.homedir(), log = console.l
 export async function bootstrapInstall(options = {}) {
   const { request = fetch, download = {}, run = exec, log = console.log, executable = process.execPath, platform = process.platform,
     mode = process.env.PURGE_INSTALL_MODE || "desktop",
-    home = process.env.DSH_HOME || path.join(os.homedir(), ".dsh"), profile = process.env.DSH_PROFILE || "", dryRun = false } = options;
+    home = process.env.DSH_HOME || path.join(os.homedir(), ".dsh"), profile = process.env.DSH_PROFILE || "", dryRun = false, ackWelcome = false } = options;
   if (!["web", "desktop"].includes(mode)) throw Error("Invalid installation mode");
   if (Number(process.versions.node.split(".")[0]) < 18) throw Error("Node >=18 is required");
   let cli = options.cli || (mode === "web" ? webCli() : desktopCli(executable, platform));
@@ -358,6 +358,7 @@ export async function bootstrapInstall(options = {}) {
     await run(tar, ["-xzf", filename], { cwd: tmp, timeout: 30000, windowsHide: true });
     const manifest = JSON.parse(fs.readFileSync(path.join(tmp, "package/package.json"), "utf8"));
     if (manifest.name !== "dsh-purge-community" || manifest.version !== version || manifest.repository?.url !== `git+https://github.com/${repo}.git`) throw Error("Release package identity mismatch");
+    if (ackWelcome && !fs.existsSync(path.join(tmp, "package/lib/welcome-ack.js"))) throw Error("--ack-welcome requires a release with the welcome acknowledgement route");
     const host = platform === "linux" && mode === "web" ? prepareLinuxHost(cli, { userHome: options.userHome, log }) : null;
     if (host) cli = host.cli;
     const result = await run(executable, [path.join(tmp, "package/bin/community.js"), "migrate", file], {
@@ -368,6 +369,16 @@ export async function bootstrapInstall(options = {}) {
     if (result.stdout?.trim()) log(result.stdout.trim());
     if (result.stderr?.trim()) log(result.stderr.trim());
     log("Installed. Settings preserved. Quit and reopen DSH manually when convenient; no restart or host patch was performed.");
+    if (ackWelcome) {
+      const marker = path.join(home, "dsh-purge", "welcome-ack.json");
+      try {
+        fs.mkdirSync(path.dirname(marker), { recursive: true });
+        fs.writeFileSync(marker, `${JSON.stringify({ acked: true, at: new Date().toISOString(), source: "installer" }, null, 2)}\n`, { mode: 0o600 });
+        log(`Welcome notice acknowledged: ${marker}`);
+      } catch (error) {
+        throw Error(`Installed, but could not write the welcome acknowledgement: ${error.message}`);
+      }
+    }
     return { version, installed: true };
   } finally { removeTreeNoFollowSync(tmp); }
 }
@@ -381,6 +392,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(fs.realpathSync(process
       else if (arg.startsWith("--profile=")) options.profile = arg.slice(10);
       else if (arg.startsWith("--archive=")) options.archiveFile = arg.slice(10);
       else if (arg.startsWith("--sha256=")) options.sha256 = arg.slice(9);
+      else if (arg === "--ack-welcome") options.ackWelcome = true;
       else throw Error(`Unknown argument: ${arg}`);
     }
     await bootstrapInstall(options);

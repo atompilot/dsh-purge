@@ -14910,8 +14910,39 @@ function writeWelcomeAck() {
 function WelcomeNotice(props = {}) {
   const t = useT();
   const [open, setOpen] = useState(() => !readWelcomeAck());
+  const [ready, setReady] = useState(() => readWelcomeAck());
   const [checked, setChecked] = useState(false);
+  useEffect(() => {
+    if (!open || ready) return;
+    let alive = true;
+    const finish = () => {
+      if (alive) setReady(true);
+    };
+    if (typeof fetch !== "function") {
+      finish();
+      return () => {
+        alive = false;
+      };
+    }
+    const timer = setTimeout(finish, 1200);
+    fetch(apiUrl("/dsh-purge/welcome-ack")).then((r) => r.json()).then((state) => {
+      if (!alive) return;
+      if (state && state.acked) {
+        writeWelcomeAck();
+        setOpen(false);
+      }
+    }).catch(() => {
+    }).finally(() => {
+      clearTimeout(timer);
+      finish();
+    });
+    return () => {
+      alive = false;
+      clearTimeout(timer);
+    };
+  }, [open, ready]);
   if (!open) return null;
+  if (!ready) return null;
   const repo = props.repo || t("welcome.repo");
   const node = h(
     "div",

@@ -12,6 +12,7 @@ function fixture(t){
  const home=path.join(tmp,'home'), profile=path.join(home,'profiles','desktop'),pack=path.join(tmp,'pack');
  fs.mkdirSync(profile,{recursive:true});fs.writeFileSync(path.join(profile,'package.json'),'{}');fs.writeFileSync(path.join(profile,'cordis.patch.yml'),'CURRENT PRIVATE SETTINGS');
  fs.mkdirSync(path.join(pack,'package/bin'),{recursive:true});
+ fs.mkdirSync(path.join(pack,'package/lib'),{recursive:true});fs.writeFileSync(path.join(pack,'package/lib/welcome-ack.js'),'');
  fs.writeFileSync(path.join(pack,'package/package.json'),JSON.stringify({name:'dsh-purge-community',version,repository:{url:'git+https://github.com/atompilot/dsh-purge.git'}}));
  fs.writeFileSync(path.join(pack,'package/bin/community.js'),`require('node:fs').writeFileSync(process.env.DSH_HOME+'/called.json',JSON.stringify({args:process.argv.slice(2),env:process.env.DSH_PROFILE,cli:process.env.PURGE_DSH_CLI}));`);
  const file=path.join(tmp,filename);const tar=process.platform==='win32'?path.join(process.env.SystemRoot,'System32/tar.exe'):'tar';execFileSync(tar,['-czf',filename,'-C','pack','package'],{cwd:tmp});const bytes=fs.readFileSync(file);
@@ -34,6 +35,12 @@ test('real extracted migration subprocess handles spaces/non-ASCII and selected 
  assert.equal(called.args[0],'migrate');assert.equal(called.env,'desktop');assert.equal(called.cli,f.cli);
  assert.equal(fs.readFileSync(path.join(f.profileDir,'cordis.patch.yml'),'utf8'),'CURRENT PRIVATE SETTINGS');
  assert(!fs.existsSync(called.args[1]),'temporary download removed after subprocess finishes');
+});
+test('--ack-welcome writes the marker only after a successful install',async t=>{
+ const f=fixture(t);const marker=path.join(f.home,'dsh-purge','welcome-ack.json');
+ await bootstrapInstall({...f,version,ackWelcome:true,dryRun:true,log:()=>{}});assert(!fs.existsSync(marker));
+ const result=await bootstrapInstall({...f,version,ackWelcome:true,log:()=>{}});assert(result.installed);
+ assert.equal(JSON.parse(fs.readFileSync(marker,'utf8')).acked,true);
 });
 test('latest stable version selection works and invalid versions/profiles do not execute',async t=>{
  const f=fixture(t);assert.equal((await bootstrapInstall({...f,dryRun:true,log:()=>{}})).version,version);

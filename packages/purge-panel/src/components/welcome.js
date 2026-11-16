@@ -3,8 +3,9 @@
 // readWelcomeAck / writeWelcomeAck) and 7846-7903 (WelcomeNotice).
 import * as rd from "react-dom";
 import WELCOME_CSS from "../styles/welcome.css";
-import { h, useState } from "../shared/react.js";
+import { h, useState, useEffect } from "../shared/react.js";
 import { useT } from "../shared/locale.js";
+import { apiUrl } from "../api/client.js";
 
 export const WELCOME_KEY = "dsh-purge-user-notice-v1";
 
@@ -27,8 +28,42 @@ export function writeWelcomeAck() {
 export function WelcomeNotice(props = {}) {
   const t = useT();
   const [open, setOpen] = useState(() => !readWelcomeAck());
+  const [ready, setReady] = useState(() => readWelcomeAck());
   const [checked, setChecked] = useState(false);
+  useEffect(() => {
+    if (!open || ready) return;
+    let alive = true;
+    const finish = () => {
+      if (alive) setReady(true);
+    };
+    if (typeof fetch !== "function") {
+      finish();
+      return () => {
+        alive = false;
+      };
+    }
+    const timer = setTimeout(finish, 1200);
+    fetch(apiUrl("/dsh-purge/welcome-ack"))
+      .then((r) => r.json())
+      .then((state) => {
+        if (!alive) return;
+        if (state && state.acked) {
+          writeWelcomeAck();
+          setOpen(false);
+        }
+      })
+      .catch(() => {})
+      .finally(() => {
+        clearTimeout(timer);
+        finish();
+      });
+    return () => {
+      alive = false;
+      clearTimeout(timer);
+    };
+  }, [open, ready]);
   if (!open) return null;
+  if (!ready) return null;
   // Branding-only difference: the community build points at its own repository.
   const repo = props.repo || t("welcome.repo");
   const node = h(

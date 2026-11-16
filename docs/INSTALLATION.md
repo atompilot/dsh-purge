@@ -73,6 +73,24 @@ macOS 默认要求 `/Applications/DeepSeek Harness.app`。自定义安装位置�
 7. 解包桌面的 `app/runtime` 缺失/损坏时，可能保留旧链接并创建指向同一安装 runtime 的链接；工作中的其他目标或不完整实体目录会报冲突。Linux 系统宿主只读时的用户副本/启动器行为见上节。不要承诺“安装器从不写宿主目录”。
 8. SHA256 对应 Release TGZ；入口脚本和 bootstrap 通过本仓库 HTTPS master 下载，不具备独立签名保证。
 
+<a id="welcome-ack"></a>
+## 首次须知的确认标识
+
+首次安装后，面板在 DSH 窗口内弹出「用户须知」属于同意流程，不是安装失败；未勾选时「我已知晓并继续」保持禁用。
+
+手动确认的状态存在 DSH 渲染进程的 `localStorage`，键名固定：
+
+```text
+dsh-purge-user-notice-v1   // 值为 "1"
+```
+
+- 勾选并点确认后写入；同一个 App 用户数据目录不再弹出。
+- 手动勾选只写 localStorage，不写入 `~/.dsh`，不随 profile 或插件版本迁移，也不跨机器同步。卸载重装但保留 App 用户数据目录仍视为已确认。
+- 需要重新显示：在 DSH 窗口的 DevTools Console 执行 `localStorage.removeItem('dsh-purge-user-notice-v1')` 后刷新窗口。
+- 复选框点不动时，先确认窗口在前台且没有被其他窗口遮挡；排除焦点问题后，在 DevTools Console 执行 `localStorage.setItem('dsh-purge-user-notice-v1', '1')`，再刷新窗口或重开 DSH。不要为这个弹窗删除 `~/.dsh`、改 profile 配置或重装插件。
+- 安装器显式选项：macOS/Linux 用 `sh scripts/install.sh --ack-welcome`，Windows 用 `scripts/install.ps1 -AckWelcome`。安装成功后写 `$DSH_HOME/dsh-purge/welcome-ack.json`；面板首次加载读到该文件会把它写成同一条 localStorage，并按已确认处理。dry-run 不写；旧版本包没有该路由时安装器会拒绝这个选项。它只用于自有/受管机器，仍然是操作者代替使用者确认，不是默认行为。
+- 远程/无人值守装机时，操作者可以显式代替使用者确认：用 `--remote-debugging-port=<空闲端口>` 启动 DSH，对 `dsh-app://app/` 页面执行同一句 `localStorage.setItem`，然后关闭调试端口并正常重启；确认值会落到 App 的 `Local Storage/leveldb/`。这是操作者的主动确认动作；默认不写入，只有显式的 `--ack-welcome` / `-AckWelcome` 才写——首次须知是使用者同意条款，静默自动写入会绕过同意。
+
 ## Issue #7：镜像缺版本
 
 日志特征：`ERR_PNPM_MINIMUM_RELEASE_AGE_VIOLATION`，唯一失败项为 `@dsh-ops/bash-win32-x64@<版本>`，原因明确是 `version not present in registry manifest`。

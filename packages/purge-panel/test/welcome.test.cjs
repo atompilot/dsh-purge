@@ -46,3 +46,31 @@ test("first-run notice carries its own modal CSS and never accepts itself", () =
   act(() => tree.unmount());
   assert.deepEqual(writes, []);
 });
+
+test("installer acknowledgement suppresses the notice and records the local ack", async () => {
+  const writes = [];
+  const ctx = {
+    module: { exports: {} },
+    exports: {},
+    require,
+    console,
+    window: {
+      localStorage: {
+        getItem: () => null,
+        setItem: (...args) => writes.push(args),
+      },
+    },
+    fetch: async () => ({ json: async () => ({ ok: true, acked: true }) }),
+    setTimeout: (fn) => setTimeout(fn, 0),
+    clearTimeout: (id) => clearTimeout(id),
+  };
+  ctx.exports = ctx.module.exports;
+  vm.runInNewContext(code, ctx);
+  let tree;
+  await act(async () => {
+    tree = create(React.createElement(ctx.module.exports.WelcomeNotice));
+    await new Promise((resolve) => setTimeout(resolve, 5));
+  });
+  assert.equal(tree.toJSON(), null);
+  assert.deepEqual(writes, [["dsh-purge-user-notice-v1", "1"]]);
+});

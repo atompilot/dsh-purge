@@ -64,6 +64,7 @@ purge-community probe new
 | 模型开始推脱/要求确认 | `probe new` | 回显否 | 回显：调人设/强化段；不回显：检查注入层 |
 | 工具被拒绝执行 | `selfcheck` | 沙箱/审批层是否绿 | 绿 → 属工具自身限制；红 → 点应用 |
 | DSH 刚更新过 | `status` | `asar_still_sealed` | 点应用 → 重开 → `selfcheck` |
+| 首次须知复选框点不动 | 窗口焦点/遮挡；`localStorage.getItem('dsh-purge-user-notice-v1')` | 未确认 | DevTools 执行 `localStorage.setItem('dsh-purge-user-notice-v1','1')` 后刷新；或安装时显式 `--ack-welcome`；见 [INSTALLATION.md](docs/INSTALLATION.md#welcome-ack) |
 | 想撤销一切 | — | — | `revert`（只撤补丁）/ `rollback <id>`（回滚插件） |
 
 完整分支（含安装失败、换包、维护锁、CLI 权限、超时、拒绝率）见 [troubleshooting.md](docs/troubleshooting.md#t-symptom)。
