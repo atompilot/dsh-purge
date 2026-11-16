@@ -75,7 +75,7 @@ dsh-purge Community 是一个跑在你自己机器上的 Harness 附加组件。
 
 1. 先打开 DSH 完成初始化。按当前官方文档，进入「插件」，点击「实验性插件」旁的「更多」，启用「自定义插件市场」；然后进入「发现 → 添加索引源」。
 2. 本项目的**社区索引**：`https://atompilot.github.io/dsh-purge/index.json`。
-3. 选择 dsh-purge Community，核对来源为 `kingcharleslzy-ai/dsh-purge`、包名为 `dsh-purge-community`，确认后安装。
+3. 选择 dsh-purge Community，核对来源为 `atompilot/dsh-purge`、包名为 `dsh-purge-community`，确认后安装。
 
 界面和安装协议由 DSH 提供，索引与插件由社区维护。不同 DSH 版本的入口文字可能不同；第三方 `dsh-market` 也可能有额外的筛选与迁移限制。已有旧包时请使用方式三。[官方市场说明](https://github.com/deepseek-ai/deepseek-harness/blob/master/docs/user/guide/plugin-market.zh.md)
 

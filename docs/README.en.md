@@ -50,7 +50,7 @@ Local learning, personal projects, automation experiments and maintenance work. 
 
 **DSH provides the official plugin UI and `dsh plugin` CLI. Our `install.sh` / `install.ps1` are community-maintained wrappers, not DeepSeek scripts.**
 
-- First installation: use DSH's Plugins install dialog. Following the current official guide, open Plugins → More beside Experimental plugins → Custom plugin market, then Discover → Add index source. Our community index: `https://atompilot.github.io/dsh-purge/index.json`. Check the owner `kingcharleslzy-ai/dsh-purge` and package `dsh-purge-community` before confirming.
+- First installation: use DSH's Plugins install dialog. Following the current official guide, open Plugins → More beside Experimental plugins → Custom plugin market, then Discover → Add index source. Our community index: `https://atompilot.github.io/dsh-purge/index.json`. Check the owner `atompilot/dsh-purge` and package `dsh-purge-community` before confirming.
 - Existing `dsh-purge` or separate panel installation: use the community installer to back up and migrate in place. Do not uninstall first or activate both packages.
 - CLI/Web users who already have `dsh` on PATH and use the `web` profile can use the official command below. Desktop users should not download another npx host to install into their existing desktop profile.
 
