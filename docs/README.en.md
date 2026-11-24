@@ -159,6 +159,7 @@ Thank you to the original author, code contributors, and everyone who provided r
     <td align="center" width="120"><a href="https://github.com/Akiiia"><img src="https://avatars.githubusercontent.com/u/74829345?s=112" width="56" height="56" alt="Akiiia" /><br /><sub>Akiiia</sub></a></td>
     <td align="center" width="120"><a href="https://github.com/AkiraNyx"><img src="https://avatars.githubusercontent.com/u/176532870?s=112" width="56" height="56" alt="AkiraNyx" /><br /><sub>AkiraNyx</sub></a></td>
     <td align="center" width="120"><a href="https://github.com/ankepoipoi"><img src="https://avatars.githubusercontent.com/u/314255825?s=112" width="56" height="56" alt="ankepoipoi" /><br /><sub>ankepoipoi</sub></a></td>
+    <td align="center" width="120"><a href="https://github.com/atompilot"><img src="https://avatars.githubusercontent.com/u/16448776?s=112" width="56" height="56" alt="atompilot" /><br /><sub>atompilot</sub></a></td>
     <td align="center" width="120"><a href="https://github.com/cracer4869"><img src="https://avatars.githubusercontent.com/u/46320829?s=112" width="56" height="56" alt="cracer4869" /><br /><sub>cracer4869</sub></a></td>
   </tr>
   <tr>
