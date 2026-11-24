@@ -6,7 +6,8 @@ import { bootstrapInstall } from './bootstrap-install.mjs';
 const home=fs.mkdtempSync(path.join(os.tmpdir(),'purge-download-acceptance-'));
 const profile=path.join(home,'profiles/desktop');fs.mkdirSync(profile,{recursive:true});
 fs.writeFileSync(path.join(profile,'package.json'),'{}');fs.writeFileSync(path.join(profile,'cordis.patch.yml'),'PRIVATE SETTINGS SENTINEL');
-const version=process.argv[2]||'1.6.38';
+// 本仓库（自建信任根）最早一件带完整附件的发行是 1.6.99；1.6.38 只存在于上游。
+const version=process.argv[2]||(process.env.PURGE_DOWNLOAD_CHECK_VERSION||'1.6.99');
 try {
   for(const fallback of [false,true]) {
     const logs=[];
