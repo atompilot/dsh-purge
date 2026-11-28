@@ -20,6 +20,7 @@
 | 面板版本与磁盘不一致 | 面板顶部黄条 + `status` | 界面与后端不同版本 | 核对磁盘与运行版本，按 README 选正确安装/迁移入口 |
 | `读取失败: timeout` | 刷新一次 | 本次请求是否完成 | 不代表宿主缺失，见 [§12](#t-timeout) |
 | 锚点漂移 / `unmatched` / `drifted` | `diagnose` | 行号 + 片段 | 见 [§7](#t-drift) |
+| ACP 客户端（T3 Code 等）里工具放行但人设没换 | `dsh --profile <acp> < /dev/null` + `probe new` | 启动是否 `did not activate`；nonce 是否回显 | 见 [§17](#t-acp) |
 | `desktop_entry` 红 | `diagnose` | 六种失败码 | 见 [§6](#t-diagnose) |
 | 写入被"维护锁"挡住 | 面板 + `audit` | 锁是否活着 | 见 [§7](#t-lock) |
 | CLI 报没权限 / 丢执行位 | 看文件 mode | 0600 / 0755 | 见 [§8](#t-cli-perm) |
@@ -193,3 +194,16 @@ Linux CLI/Web 先按 README 下载脚本；只有已在仓库根目录才可用 
 - ASAR 条目、数据范围或链接目标异常时，解包整体失败并保留正在使用的安装；不得忽略越界条目、吞掉链接创建错误后继续换包。资源路径必须同时通过文字路径与真实链接目标校验。
 - 插件停用/卸载后旧回调失效，仅清理该实例自己的全局入口；旧实例不能清掉新实例的回调。用户提示词、配置与宿主磁盘补丁不因此删除。
 - 应用前逐文件备份有任一错误就停止写入，不能声称可回滚。Windows 实测要验证打开的备份描述符已关闭、应用/还原字节一致；普通 Node/Linux 通过不足以证明 Windows 文件句柄正常。
+
+<a id="t-acp"></a>
+
+## 17. ACP 客户端（T3 Code 等）接入与不生效
+
+完整链路、步骤与维护点见 [ACP 接入](maintenance-acp.md)；这里只给症状分支。
+
+- **只有一半生效**：沙箱/审批/文件围栏放开了，但模型仍说"我是 AI 助手"、`probe` 不回显。这是 **ACP profile 没装插件**，不是补丁失效——宿主补丁是全局的（同一棵 `Resources/app` 树），注入是 profile 的。动作：`dsh plugin --profile <acp> add <固定版本TGZ>`，确认 `package.json` 的 `dsh.profile.bundles` 里有 `dsh-purge-community`，然后让客户端重开进程。
+- **启动告警 `pending (waiting for service: webServer)`**：ACP 没有 web 宿主，`dsh-purge-redteam-ui`（面板/演练台 HTTP 桥）永远等不到依赖。在该 profile 的 `cordis.patch.yml` 里用 `- id: dsh-purge-redteam-ui` + `disabled: true` 显式关掉；**不要**为了消除警告加未验证的服务别名（见 [compatibility.md §6](compatibility.md#c-unknown) 的 #127 约束）。
+- **DSH 更新后 ACP 突然变回原版**：`app.asar` 回来了，`dsh` launcher 优先 asar → 补丁全空转且不报错。动作：`dsh-purge-align status` 确认「`Resources/app.asar` 不存在（已让位）」→ 不在就让位重打 → 重开客户端会话。判据用 `ps` 的 argv（`Resources/app/dsh/...` vs `Resources/app.asar/dsh/...`），不要用界面状态。
+- **升级插件只升了一个 profile**：桌面升了、ACP 没升。`selfcheck` 只覆盖宿主与当前 profile，看不到 acp profile 的磁盘版本。动作：两个 profile 分别 `add`，再 `node -e` 读各自 `node_modules/dsh-purge-community/package.json` 的 `version` 对比。
+- **客户端升级后配置丢了**：重装 T3 Code 可能清掉 provider，表现为 "provider not ready"。核对 Executable `/usr/local/bin/dsh`、Arguments `--profile` / `acp`；`dsh` 是脚本符号链接，别改成 Electron 主程序路径。
+- **不要做的事**：不要为 ACP 再写一份 `prompt-inject.md`（全局一份）；不要在 ACP 上验证 `unrestricted` 预设（无预设下拉）；不要把 ACP 的 probe 回显写进桌面版的验收记录。

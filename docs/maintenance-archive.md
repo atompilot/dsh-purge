@@ -55,6 +55,7 @@
 | 1.6.74 | 保留消息与普通提示词错误：`PURGE_INVALID_PRE_STEP_DECISION` 要定位回调；含旧入口导入失败与 1.6.73 语法错误。 | [`#v1-6-74-messages`](#v1-6-74-messages) |
 | 1.6.75 | 目标安装、市场与镜像：#130 CLI 入口、#132 `mirrorUrl`、#137 逐发行兼容范围。 | [`#v1-6-75-target`](#v1-6-75-target) |
 | 1.6.81 | 证据账本：`claimed` / `inferred` 的区分，用 `redteam_evidence_upgrade` 提交实际核实结果。 | [`#v1-6-81-evidence`](#v1-6-81-evidence) |
+| 1.7.20 补录 | ACP 客户端接入（T3 Code）：宿主补丁全局继承、注入按 profile 装；asar 回归维护点与两条验收证据。 | [`#v1-7-20-acp`](#v1-7-20-acp) |
 
 ---
 
@@ -584,3 +585,18 @@ Windows 换包仅对真实共享/锁冲突继续等待；其他错误保留 `det
 ## 证据账本（1.6.81 起）
 
 口头报告用 `claimed` 并填写 `source_agent`。工具默认按 `inferred` 记录。用 `redteam_evidence_upgrade` 提交实际核实的结果；普通引用和旧版缺少核实记录的引用保留，需另行核实。计数或哈希报错时先处理账本异常。导入文件须位于当前靶标目录，可暂存在其 `incoming/` 子目录，也可以直接传截图内容。已撤回的问题可按 `withdrawn` 查询。
+
+<a id="v1-7-20-acp"></a>
+
+## ACP 客户端接入（1.7.20 文档补录 / 2026-11-25）
+
+第三种运行形态：客户端（T3 Code Nightly）通过 ACP 拉起 `dsh`，配置为 `Executable=/usr/local/bin/dsh` + `--profile acp`，落盘在 `~/.t3/userdata/settings.json` 的 `providerInstances.acpRegistry_deepseek_harness.config`。
+
+- `dsh` 是指向 launcher 脚本的符号链接，按 `Resources/app.asar` 是否存在选加载源，最终执行 `Resources/app/dsh/node_modules/@deepseek-ai/dsh-desktop-host/lib/cli.js`——**与桌面版同一棵已被 86 条补丁改写的源码树**。因此 ACP 不需要单独"打补丁"，宿主补丁、`dsh-base` 的 `danger-full-access` / `approval: never` 默认值、审批 auto-grant 全部自动继承。
+- 不继承的是 profile 级插件：`$DSH_HOME/profiles/acp` 初始只有 `dsh-base` + `dsh-acp-app`，`node_modules` 为空。表现是"沙箱放开了、人设没换、probe 不回显"。装法 `dsh plugin --profile acp add <固定版本TGZ>`，并确认 `dsh.profile.bundles` 里有 `dsh-purge-community`（直接 pnpm 只加依赖、不加 bundle 行）。
+- ACP 没有 `webServer`：`dsh-purge-redteam-ui` 会永远 `pending (waiting for service: webServer)`。正确做法是在该 profile 的 `cordis.patch.yml` 里 `- id: dsh-purge-redteam-ui` + `disabled: true`；**不要**加未验证的服务别名（#127 约束仍然有效）。
+- 验收要两条独立证据：`dsh --profile acp < /dev/null` → `exit=0` 且无 `did not activate`；`purge-community probe new` 的 nonce 经一次最小 ACP 会话（NDJSON：`initialize` → `session/new` → `session/prompt`）回显。本次实测回显 `[purge-7f140d32]`，session `acaaab2f`。
+- 后续维护点：① DSH 桌面更新后 `app.asar` 回归、launcher 优先 asar → ACP 静默变回未打补丁，顺序固定为 `dsh-purge-align` → 重开客户端会话，判据用 `ps` 的 argv 或 `dsh-purge-align status` 的「`Resources/app.asar` 不存在（已让位）」；② 每个 profile 各装一份插件，升级时逐个 `add`，`selfcheck` 只覆盖宿主与当前 profile，**看不到 acp profile 的磁盘版本**；③ 新增 ACP 客户端 = 新增 profile，按同一套证据重跑；④ 客户端升级可能丢 provider 配置，核对可执行文件与参数，别把 `dsh` 脚本链接改成 Electron 主程序；⑤ ACP 没有面板与预设下拉（`unrestricted` 不生效），`prompt-inject.md` 全局一份，ACP 与桌面的验收记录分栏写、不互相顶替。
+- 未实测：其它 ACP 客户端（Zed 等）、Windows 上的 ACP 接入、ACP 的交互式审批/等待回答语义。`dsh-acp-app` 的默认 model/provider（`deepseek-official` / `deepseek-v4-flash`）可被客户端会话覆盖，不写进兼容结论。
+
+> 排障 / 兼容入口：[troubleshooting.md#t-acp](troubleshooting.md#t-acp) · [maintenance-acp.md](maintenance-acp.md) · [compatibility.md#c-matrix](compatibility.md#c-matrix)

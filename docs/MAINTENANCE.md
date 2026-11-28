@@ -18,6 +18,8 @@
 
 安装/更新、应用宿主补丁、重启是独立动作。安装前备份，应用宿主补丁前也备份；不因安装成功自动应用或重启。更新检查与自动安装分别设置，默认检查开、安装关，已有偏好继续保留。
 
+ACP 客户端（T3 Code 等）以独立 profile 运行：宿主补丁继承同一棵树，提示词注入要按 profile 单独安装，接入与后续维护点见 [ACP 接入](maintenance-acp.md)。
+
 ## 快照
 
 路径 `$DSH_HOME/dsh-purge-community/backups/<id>/manifest.json`，完整性清单含 SHA256 与原 profile、Purge bundles；大文件内容寻址去重在 `objects/`。默认保留最近 5 份、每天 1 份共 7 天、200MB 上限，当前操作快照受保护。维护锁防止并发；异常退出残留锁先确认没有维护进程，不能盲目删锁。

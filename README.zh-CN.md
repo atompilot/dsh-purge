@@ -218,6 +218,7 @@ Web 面板默认接受回环地址和宿主配置的监听地址。通过自有�
 | 已验证宿主 | DSH Desktop 0.2.2-rc.3 / 0.2.2-rc.2 / 0.2.2-rc.1 / 0.2.1-rc.1 / 0.2.1-rc.2 / 0.2.1-rc.3 / 0.2.1-rc.5 |
 | 0.2.2-rc.2 | 补丁 74 applied / 零漂移，自检与破甲/回退回归在 macOS 通过；Windows 仅验证预设卡片与启动诊断，未复测补丁。 |
 | 其它宿主 | 允许安装，自检会标「未验证」；先看 `diagnose` |
+| 支持的 profile | `desktop` / `web` / `acp`（ACP 客户端如 T3 Code：宿主补丁自动继承，插件要按 profile 单独装，见 [ACP 接入](docs/maintenance-acp.md)） |
 | Node | ≥18（桌面版自带运行时即可）；红队工具需 ≥22.5（`node:sqlite`） |
 
 ## 出问题怎么办

@@ -11,7 +11,7 @@
 | --- | --- |
 | 插件版本 | `dsh-purge-community` 1.7.20 |
 | 声明范围 | `dsh.compatibility.dsh = ">=0.2.1-rc.1 <0.3.0"` |
-| profile | `desktop`、`web` |
+| profile | `desktop`、`web`、`acp`（`acp` 为 2026-11-25 实测：0.2.2-rc.3 + 插件 1.7.20 + T3 Code，宿主补丁同一棵树、注入层需单独装，见 [ACP 接入](maintenance-acp.md)） |
 | 逐发行状态字段 | `dsh.compatibility.dshReleases` |
 
 | 宿主发行 | 状态 | 依据 / 备注 |
@@ -84,6 +84,7 @@
 | DSH 桌面版（Electron，密封 `app.asar`） | 写盘 + 启动等待助手，用户**完整退出**后换包 | 不自动退出/重启；`asar_handoff.phase` 是唯一证据；`desktop` profile 由 Electron 应用初始化，普通 `--profile desktop --dump-config` 报 managed exclusively 属预期，不能据此判断程序坏了，也不能手造"已接受协议/已登录"记录 |
 | 桌面版（已解包） | 直接写源码目录 | 仍需退出重开才加载；`app/runtime` 链接可能需修复 |
 | Web / 独立 CLI | 直接写源码目录，子路径请求按实际插件脚本路径定位挂载点 | 根路径与桌面入口继续兼容；不为修 404 扩大 Cookie 域或合并端口 |
+| ACP 客户端（T3 Code 等，`--profile acp`） | 不改宿主：`/usr/local/bin/dsh` 加载的就是桌面版同一棵已打补丁的 `Resources/app` 树 | **宿主补丁自动继承，注入层不继承**：插件按 profile 安装，空 profile 只有 `dsh-base` + `dsh-acp-app`。无 webServer → 面板与演练台 HTTP 桥不适用，需显式 `disabled`；无预设下拉 → `unrestricted` 不生效。`selfcheck` 不覆盖 ACP profile，验收用启动自检 + probe 回显两条证据（[细节](maintenance-acp.md)） |
 
 - 跨 surface：Web GUI 触发「应用」时同样要等桌面退出后换包（`sealedDesktopHandoffAnySurface()` + `runningDesktopPid()`）；桌面没运行则返回 `needsDesktopApply`，不假装成功。决策由 `planApplyRestartAction()` 覆盖（sealed / cross-surface / manual / plain）。
 - **premium 发行版**：本仓库没有独立适配记录，`dshReleases` 里也没有对应条目，按 `unknown` 处理；不得据 README 或桌面版结论推断 premium 可用。
@@ -98,3 +99,4 @@
 - #127 的 httpServer/webServer 契约问题未合入——不要自行加未经验证的服务别名，也不要把 HTTP 可连接当作消费者正常启动。
 - 受影响 Windows 4090 的 Defender 完整回滚阻断仍未解决（见 [发行范围](releases/1.6.70.md)）；不能把"维护者要求发布"说成问题已修复，也不关防护、不加白名单、不把组件测试说成完整通过。
 - 磁盘已应用 ≠ 当前进程已加载；安装成功 ≠ 补丁生效；补丁生效 ≠ 模型行为达标。这三件事分别取证，不互相代替。
+- ACP 形态的结论按 profile 记：`desktop` 的验收不能当 `acp` 的证据（注入层、面板、预设都不同），`acp` 的回显也不能反推桌面版；其它 ACP 客户端（Zed 等）仍未实测。

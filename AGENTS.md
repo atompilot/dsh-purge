@@ -137,6 +137,17 @@ purge-community probe new
 - **不要安装后自动 apply/restart**；不改提示词、权限、代理、更新偏好或其他插件。真实的发布时长不足、integrity/trust 错误、私有源、未知错误保持失败并留日志：**不要设 minimumReleaseAge=0**、trustLockfile，也不要删锁文件、全局清缓存或改全局 npm 源。
 - 失败先看 `backup_id`，恢复走 `rollback <id>`；公开 issue 只附脱敏错误。逐分支动作见 [troubleshooting.md#t-install](docs/troubleshooting.md#t-install)。
 
+## 13. 多宿主接入：ACP profile（T3 Code 等）
+
+**一句话**：宿主补丁是全局的，提示词注入是 profile 的。ACP 客户端跑另一个 profile，不装插件就只有"门拆了、人没换"。
+
+- 链路：客户端（如 T3 Code）配 `Executable=/usr/local/bin/dsh` + `--profile acp`；`dsh` 是脚本，按 `app.asar` 是否存在选加载源，最终跑 `Resources/app/dsh/.../dsh-desktop-host/lib/cli.js`——**和桌面版同一棵树**，所以 86 条补丁和 `dsh-base` 的 `danger-full-access`/`never` 默认值自动继承。
+- 缺的一层：`$DSH_HOME/profiles/acp` 初始只有 `dsh-base` + `dsh-acp-app`。装法：`dsh plugin --profile acp add <固定版本TGZ>`，并确认 `package.json` 的 `dsh.profile.bundles` 含 `dsh-purge-community`（直接 pnpm 只加依赖不加 bundle 行）。
+- 必关一条：ACP 没有 `webServer`，`dsh-purge-redteam-ui` 会永远 `pending`；在该 profile 的 `cordis.patch.yml` 写 `- id: dsh-purge-redteam-ui` + `disabled: true`。不要加未验证的服务别名去消警告。
+- 验收两条独立证据：`dsh --profile acp < /dev/null` → `exit=0` 且无 `did not activate`；`purge-community probe new` → 经 ACP 会话回显 nonce。缺一条不算通过。
+- **后续维护点（每次都要过）**：① DSH 更新后 `app.asar` 回归、launcher 优先 asar → ACP 静默变回未打补丁，顺序是 `dsh-purge-align` → 重开客户端会话；② 每个 profile 各装一份插件，升级时逐个 `add`，`selfcheck` 不覆盖 acp profile；③ 新增 ACP 客户端 = 新增 profile，按本节日志重跑；④ 客户端升级可能丢 provider 配置，核对可执行文件与参数；⑤ ACP 与桌面的验收记录分栏写，不互相顶替。
+- 细节、回归检查表与未知项：[maintenance-acp.md](docs/maintenance-acp.md)。
+
 ## 21. 多 profile 更新与源码 ZIP 校验
 
 - 更新时以每个 profile 的实际包版本为准，不能把 `applied: true` 当成全部成功：同时检查 `ok`、`hasUpdate`、`targets` 和错误。部分安装仍可能需要用户手动重启，但重启不能替代失败目标的重试；不要因此改用户的更新开关、版本 pin、提示词或权限。
@@ -161,4 +172,5 @@ purge-community probe new
 | `AGENTS.md`（本文件） | 干活前、不确定操作顺序或该不该点「应用」 |
 | [troubleshooting.md](docs/troubleshooting.md) | 有症状、有报错、要判读 `selfcheck` / `host-status` 的 state |
 | [compatibility.md](docs/compatibility.md) | 换宿主版本、判断某条补丁在该宿主适不适用 |
+| [maintenance-acp.md](docs/maintenance-acp.md) | 接 ACP 客户端（T3 Code 等）、ACP 里只生效一半、DSH 更新后 ACP 变回原版 |
 | [maintenance-archive.md](docs/maintenance-archive.md) | 追溯旧版本行为、核对某个 PR 的原始约束 |

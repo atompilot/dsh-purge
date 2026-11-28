@@ -99,6 +99,8 @@ On DSH 0.2.2-rc.2 the 86 patches apply as 74 applied / 0 drift and selfcheck is 
 
 Plugin `dsh-purge-community` 1.7.20 · verified on DSH Desktop 0.2.2-rc.3 / 0.2.2-rc.2 / 0.2.2-rc.1 / 0.2.1-rc.1 / rc.2 / rc.3 / rc.5 · Node ≥ 18.
 
+Profiles: `desktop`, `web`, `acp`. An ACP client (T3 Code and friends) runs its own profile: the host patches are inherited from the same `Resources/app` tree, but the prompt injection must be installed into that profile. Setup and the post-update checklist: [ACP clients](maintenance-acp.md).
+
 ## Troubleshooting
 
 ```sh
