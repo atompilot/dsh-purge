@@ -509,6 +509,14 @@ const main = async () => {
 };
 
 // 被 import 时（测试/其它脚本）不要执行动作，只导出工具函数。
-if (process.argv[1] && path.resolve(process.argv[1]) === path.resolve(fileURLToPath(import.meta.url))) {
+// 比较必须走 realpath：/tmp → /private/tmp 这类符号链接会让"路径相等"判断失效，
+// 结果是脚本一声不响地什么都不做还返回 0 —— 比报错危险得多。
+function invokedDirectly() {
+  const invoked = process.argv[1];
+  if (!invoked) return false;
+  const real = (p) => { try { return fs.realpathSync(p); } catch { return path.resolve(p); } };
+  return real(invoked) === real(fileURLToPath(import.meta.url));
+}
+if (invokedDirectly()) {
   main().catch((error) => fail(error && error.message ? error.message : String(error)));
 }

@@ -4,6 +4,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { parseLegacyFailure } from '../scripts/purge-align.mjs';
 
@@ -57,6 +59,20 @@ test('legacy permission failures are classified, not guessed', () => {
   assert.equal(parseLegacyFailure(undefined), null);
   // 多行只读第一行：引擎把路径与原因放在同一行，后面可能是堆栈。
   assert.equal(parseLegacyFailure('Legacy permission migration: /tmp/b.js: missing backup for possible retired permission edit\nat foo').repairable, false);
+});
+
+test('align script still runs when invoked through a symlinked path', () => {
+  // /tmp -> /private/tmp 这类符号链接会让 "argv[1] === import.meta.url" 判断失效，
+  // 脚本会一声不响地什么都不做还返回 0。这条用例钉住 realpath 比较。
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'purge-align-link-'));
+  const link = path.join(dir, 'align-link.mjs');
+  try {
+    fs.symlinkSync(path.resolve('scripts/purge-align.mjs'), link);
+    const out = execFileSync(process.execPath, [link, '--help'], { encoding: 'utf8' });
+    assert.ok(out.includes('--recover-legacy'), '通过符号链接调用时脚本没有执行');
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
 });
 
 test('entry docs carry the one-command path', () => {
