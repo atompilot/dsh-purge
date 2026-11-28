@@ -80,8 +80,9 @@ test('archive keeps the acp record and the release draft stays a draft', () => {
   assert.ok(archive.includes('](#v1-7-20-acp)'), '档案索引未指向 ACP 条目');
   assert.ok(archive.includes('maintenance-acp.md'), '档案未交叉引用 ACP 页面');
 
-  const draft = read('docs/releases/1.7.21.md');
-  assert.ok(fs.statSync('docs/releases/1.7.21.md').size <= 8 * 1024, '发行摘要超过 8 KiB');
+  // 草稿跟着下一个版本号走：1.7.21 已被上游发行占用，ACP 补录的草稿顺延到 1.7.25。
+  const draft = read('docs/releases/1.7.25.md');
+  assert.ok(fs.statSync('docs/releases/1.7.25.md').size <= 8 * 1024, '发行摘要超过 8 KiB');
   assert.ok(draft.includes('发版清单'), '草稿缺少发版清单');
   // 草稿只有在版本号真 bump 之后才允许自称正式版；否则必须保留草稿标记。
   const first = draft.split('\n')[0].trim();

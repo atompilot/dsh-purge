@@ -201,9 +201,10 @@ Linux CLI/Web 先按 README 下载脚本；只有已在仓库根目录才可用 
 
 完整链路、步骤与维护点见 [ACP 接入](maintenance-acp.md)；这里只给症状分支。
 
-- **只有一半生效**：沙箱/审批/文件围栏放开了，但模型仍说"我是 AI 助手"、`probe` 不回显。这是 **ACP profile 没装插件**，不是补丁失效——宿主补丁是全局的（同一棵 `Resources/app` 树），注入是 profile 的。动作：`dsh plugin --profile <acp> add <固定版本TGZ>`，确认 `package.json` 的 `dsh.profile.bundles` 里有 `dsh-purge-community`，然后让客户端重开进程。
+- **只有一半生效**：宿主补丁打上了，但模型仍说"我是 AI 助手"、`probe` 不回显。这是 **ACP profile 没装插件**，不是补丁失效——宿主补丁是全局的（同一棵 `Resources/app` 树），注入是 profile 的。动作：`dsh plugin --profile <acp> add <固定版本TGZ>`，确认 `package.json` 的 `dsh.profile.bundles` 里有 `dsh-purge-community`，然后让客户端重开进程。
 - **启动告警 `pending (waiting for service: webServer)`**：ACP 没有 web 宿主，`dsh-purge-redteam-ui`（面板/演练台 HTTP 桥）永远等不到依赖。在该 profile 的 `cordis.patch.yml` 里用 `- id: dsh-purge-redteam-ui` + `disabled: true` 显式关掉；**不要**为了消除警告加未验证的服务别名（见 [compatibility.md §6](compatibility.md#c-unknown) 的 #127 约束）。
 - **DSH 更新后 ACP 突然变回原版**：`app.asar` 回来了，`dsh` launcher 优先 asar → 补丁全空转且不报错。动作：`dsh-purge-align status` 确认「`Resources/app.asar` 不存在（已让位）」→ 不在就让位重打 → 重开客户端会话。判据用 `ps` 的 argv（`Resources/app/dsh/...` vs `Resources/app.asar/dsh/...`），不要用界面状态。
 - **升级插件只升了一个 profile**：桌面升了、ACP 没升。`selfcheck` 只覆盖宿主与当前 profile，看不到 acp profile 的磁盘版本。动作：两个 profile 分别 `add`，再 `node -e` 读各自 `node_modules/dsh-purge-community/package.json` 的 `version` 对比。
 - **客户端升级后配置丢了**：重装 T3 Code 可能清掉 provider，表现为 "provider not ready"。核对 Executable `/usr/local/bin/dsh`、Arguments `--profile` / `acp`；`dsh` 是脚本符号链接，别改成 Electron 主程序路径。
 - **不要做的事**：不要为 ACP 再写一份 `prompt-inject.md`（全局一份）；不要在 ACP 上验证 `unrestricted` 预设（无预设下拉）；不要把 ACP 的 probe 回显写进桌面版的验收记录。
+- **1.7.24 起工具被拦不等于补丁没打**：那 14 条改写沙箱/审批的补丁已下线，边界归该 profile 的宿主配置。看 `status` 的权限栏与 profile 配置，不要靠「重新应用」解决。

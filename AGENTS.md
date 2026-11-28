@@ -145,9 +145,10 @@ dsh-go 手机本机引擎的 profile 由 App 身份管理。遇到 `EACCES`，�
 
 **一句话**：宿主补丁是全局的，提示词注入是 profile 的。ACP 客户端跑另一个 profile，不装插件就只有"门拆了、人没换"。
 
-- 链路：客户端（如 T3 Code）配 `Executable=/usr/local/bin/dsh` + `--profile acp`；`dsh` 是脚本，按 `app.asar` 是否存在选加载源，最终跑 `Resources/app/dsh/.../dsh-desktop-host/lib/cli.js`——**和桌面版同一棵树**，所以 86 条补丁和 `dsh-base` 的 `danger-full-access`/`never` 默认值自动继承。
+- 链路：客户端（如 T3 Code）配 `Executable=/usr/local/bin/dsh` + `--profile acp`；`dsh` 是脚本，按 `app.asar` 是否存在选加载源，最终跑 `Resources/app/dsh/.../dsh-desktop-host/lib/cli.js`——**和桌面版同一棵树**，所以 74 条宿主补丁（1.7.24 起；1.7.23 及以前 88 条）自动继承。**但权限/沙箱/审批不继承**：1.7.24 已把 14 条改写执行边界的补丁下线，边界归该 profile 自己的配置，别按旧版经验说「工具全放行」。
 - 缺的一层：`$DSH_HOME/profiles/acp` 初始只有 `dsh-base` + `dsh-acp-app`。装法：`dsh plugin --profile acp add <固定版本TGZ>`，并确认 `package.json` 的 `dsh.profile.bundles` 含 `dsh-purge-community`（直接 pnpm 只加依赖不加 bundle 行）。
 - 必关一条：ACP 没有 `webServer`，`dsh-purge-redteam-ui` 会永远 `pending`；在该 profile 的 `cordis.patch.yml` 写 `- id: dsh-purge-redteam-ui` + `disabled: true`。不要加未验证的服务别名去消警告。
+- 版本分水岭：1.7.24 起宿主补丁 88 → 74，沙箱/审批/授信/fence 那 14 条下线，改由宿主配置 + 注入层开关承担（`excludePresets` / `excludeSessions` / `layers`）。读旧记录时先确认写的是哪一版的口径。
 - 验收两条独立证据：`dsh --profile acp < /dev/null` → `exit=0` 且无 `did not activate`；`purge-community probe new` → 经 ACP 会话回显 nonce。缺一条不算通过。
 - **后续维护点（每次都要过）**：① DSH 更新后 `app.asar` 回归、launcher 优先 asar → ACP 静默变回未打补丁，顺序是 `dsh-purge-align` → 重开客户端会话；② 每个 profile 各装一份插件，升级时逐个 `add`，`selfcheck` 不覆盖 acp profile；③ 新增 ACP 客户端 = 新增 profile，按本节日志重跑；④ 客户端升级可能丢 provider 配置，核对可执行文件与参数；⑤ ACP 与桌面的验收记录分栏写，不互相顶替。
 - 细节、回归检查表与未知项：[maintenance-acp.md](docs/maintenance-acp.md)。

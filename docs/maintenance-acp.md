@@ -1,7 +1,8 @@
 # ACP 客户端接入（T3 Code / 其它 ACP 宿主）
 
-> 一句话：**宿主补丁是全局的，提示词注入是 profile 的。** ACP 客户端跑的是另一个 profile，插件不装进去，你得到的就是半套状态——沙箱、审批、文件围栏都放开了，但没有人设注入、没有强化段、没有 probe 回显。
+> 一句话：**宿主补丁是全局的，提示词注入是 profile 的。** ACP 客户端跑的是另一个 profile，插件不装进去，你得到的就是半套状态——宿主补丁生效了，但没有人设注入、没有强化段、没有 probe 回显，而界面上没有任何报错。
 > 首次实测：2026-11-25，DSH Desktop 0.2.2-rc.3（`Resources/app` 已解包，73 applied / 零漂移）+ `dsh-purge-community` 1.7.20 + T3 Code (Nightly) + `acp` profile，macOS 26.2。
+> 2026-11-27 复核：插件 1.7.24 起宿主补丁 **74 条**，那 14 条权限/沙箱/审批补丁已下线（见 §8）——本文档 §2 的「机械门」归属按 1.7.24 口径写。
 
 <a id="acp-chain"></a>
 
@@ -16,7 +17,7 @@
 | profile 目录 | `$DSH_HOME/profiles/acp`（bundles 默认只有 `@deepseek-ai/dsh-base` + `@deepseek-ai/dsh-acp-app`，`node_modules` 初始为空） |
 | 提示词正文 | `$DSH_HOME/prompt-inject.md`，**全局一份**，桌面版和 ACP 共用 |
 
-**关键推论**：ACP 进程加载的就是桌面版同一份、已被 86 条补丁改写过的源码树。所以 ACP 不需要单独"打补丁"，只需要单独"装插件"。
+**关键推论**：ACP 进程加载的就是桌面版同一份、已被 74 条补丁改写过的源码树（1.7.24 起；1.7.23 及以前是 88 条）。所以 ACP 不需要单独"打补丁"，只需要单独"装插件"。
 
 <a id="acp-layers"></a>
 
@@ -24,8 +25,8 @@
 
 | 层 | 载体 | ACP 是否自动生效 | 需要做什么 |
 | --- | --- | --- | --- |
-| 宿主补丁（86 条） | `Resources/app/.../@deepseek-ai/**` | **是**（同一棵树） | 无；确认加载源是 `app` 目录而不是 `app.asar` |
-| 机械门（沙箱 / 审批 / FS 围栏） | 补丁 + `dsh-base` 默认值 | **是**：base 的 `sandbox-policy.mode` 已被改成 `danger-full-access`、`approval.policy` 为 `never`，`dsh-user-approval` 还有 auto-grant 补丁 | 无；不要为此再写 profile 权限块 |
+| 宿主补丁（74 条） | `Resources/app/.../@deepseek-ai/**` | **是**（同一棵树） | 无；确认加载源是 `app` 目录而不是 `app.asar` |
+| 机械门（沙箱 / 审批 / FS 围栏） | **宿主自己的配置**（1.7.24 起不再由补丁改写，见 §8） | **继承的是宿主配置，不是补丁**：ACP profile 用的是它自己的 `dsh-base` + `cordis.patch.yml` 解析结果 | 在该 profile 的配置里写清 `sandbox` / `approval`；插件只报告状态，不替你强制 |
 | 提示词注入 / 强化段 / probe | `dsh-purge-community` 插件（bundle 层） | **否**：空 profile 没有插件 | 见 §3 |
 | `unrestricted` 预设 | `dsh-purge-community/presets-plugin` | **否**，且 ACP 没有预设下拉 | 人设只能靠注入正文；不要指望预设 |
 | 面板 / 演练台 HTTP 桥 | `dsh-purge-community` 的 client 与 `redteam/ui` | **不适用**：ACP 没有 webServer | 显式 `disabled`，别加未验证的服务别名去"修"它 |
@@ -38,7 +39,7 @@
 2. 装插件（固定版本 TGZ，走官方 CLI 转发 pnpm；`bundles` 会自动补上 `dsh-purge-community`，装完仍要肉眼确认一次）：
    ```sh
    dsh plugin --profile acp add \
-     https://github.com/atompilot/dsh-purge/releases/download/v1.7.20/dsh-purge-community-1.7.20.tgz
+     https://github.com/atompilot/dsh-purge/releases/download/v1.7.24/dsh-purge-community-1.7.24.tgz
    ```
    `pnpm add` 只加依赖、不加 bundle 行；如果你绕开 CLI 直接 pnpm，必须自己往 `dsh.profile.bundles` 补一条。
 3. 关掉 ACP 里永远等不到 `webServer` 的条目，写进 `$DSH_HOME/profiles/acp/cordis.patch.yml`：
@@ -103,7 +104,7 @@ STOP: {"stopReason":"end_turn"}
 - [ ] `~/.dsh/profiles/acp/package.json`：`dependencies` 与 `dsh.profile.bundles` 都含 `dsh-purge-community`
 - [ ] `cordis.patch.yml` 里 `dsh-purge-redteam-ui` 为 `disabled: true`
 - [ ] 客户端侧确认 provider 仍指向 `/usr/local/bin/dsh --profile acp`（升级/重装客户端可能丢配置）
-- [ ] 用一个会触发机械门的动作验证沙箱（如读取工作区外文件），确认没有弹审批
+- [ ] 用一个会触发机械门的动作验证沙箱（如读取工作区外文件）：结果要与**该 profile 的配置**一致（1.7.24 起边界归宿主，不再由补丁强制），不要照抄桌面版的旧结论
 
 <a id="acp-unknown"></a>
 
@@ -111,6 +112,26 @@ STOP: {"stopReason":"end_turn"}
 
 - **其它 ACP 客户端**（Zed、其它编辑器 ACP 集成）：未实测。链路相同不代表行为相同，尤其权限请求与会话生命周期。
 - **ACP 下的面板 / 演练台 / 红队 HTTP 桥**：不适用（无 `webServer`）；不要为了"补齐"而在 ACP profile 里引入 web 服务。
-- **ACP 下的交互式审批 / 等待回答语义**：未验证。宿主补丁把审批改成 auto-grant，但这不等于 ACP 客户端侧的权限 UI 会正确表现。
+- **ACP 下的交互式审批 / 等待回答语义**：未验证。1.7.24 起审批口径由宿主配置决定（不再有 auto-grant 补丁），但 ACP 客户端侧是否渲染权限请求仍未实测。
 - **Windows 上的 ACP 接入**：未实测。
 - **`dsh.acp` 的 model/provider 默认值**来自 `dsh-acp-app` 的 bundle patch（`deepseek-official` / `deepseek-v4-flash`），客户端可以在会话里覆盖；不要把客户端选的模型写进兼容结论。
+
+<a id="acp-version-boundary"></a>
+
+## 8. 版本边界：1.7.24 起「边界」不再由补丁改写
+
+这是接入 ACP 时必须先对齐的一条，否则会按旧经验判断错。
+
+| | 1.7.23 及以前 | 1.7.24 起 |
+| --- | --- | --- |
+| 宿主补丁总数 | 88 | **74** |
+| 沙箱 `deny → allow`、审批默认 `never`、升级无条件授信、fs fence 取消 | 由补丁改写宿主源码 | **已下线**；边界交回宿主配置 |
+| ACP 继承什么 | 补丁 + `dsh-base` 默认值（等于"工具全放行"） | 只有那 74 条补丁；**权限/审批看该 profile 的配置** |
+| 注入层 | `prompt-inject.md` + 插件 | 不变，外加 `excludePresets` / `excludeSessions` / `layers` 分层开关（[granular-injection.md](granular-injection.md)） |
+
+因此：
+
+- **不要**把「ACP 里工具被拦」当成补丁没打——先看该 profile 的 `sandbox` / `approval` 配置，再看 `purge-community status` 的权限栏。
+- **不要**再往 ACP profile 里塞权限块来"复刻"旧行为；要放宽就按宿主自己的配置口径写一次，并记清是配置达成的、不是补丁达成的。
+- `tuning.permissionPatches` 字段仍在（兼容），但**不再影响任何补丁**——读到它不报错，也没有效果。
+- 升级到 1.7.24 后第一次打开状态页看到「旧版权限改动待恢复」属预期：按提示恢复或保留现场，不要手动删 `.dshpurge.bak`。
