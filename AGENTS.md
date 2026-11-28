@@ -1,7 +1,7 @@
 # AGENTS.md — 给 AI agent 的 Purge 使用说明书
 
 > 写给**在 DSH 里干活的 agent**，不是营销文档。
-> 当前版本：**1.7.24** · 适配 DSH Desktop **0.2.2-rc.3**（0.2.2-rc.1 / rc.2 / rc.3 / 0.2.1-rc.1 / rc.2 / rc.3 / rc.5 同样通过）
+> 当前版本：**1.7.25** · 适配 DSH Desktop **0.2.2-rc.3**（0.2.2-rc.1 / rc.2 / rc.3 / 0.2.1-rc.1 / rc.2 / rc.3 / rc.5 同样通过）
 > 版本号由 `npm run check:docs` 与 `package.json` 校验，发版必须同步；历史版本与 PR 记录在 [maintenance-archive](docs/maintenance-archive.md)，不要再写回本文件。
 
 ---
@@ -101,11 +101,21 @@ purge-community probe new
 - 不要把它当成"额外破甲"——破甲靠宿主补丁，预设只改人格。
 - 回归测试卡：`docs/preset-test.md`（A/B 五条 prompt + 判读标准 + 不通过怎么办）。
 
+## 8.5 一键脚本：装上 ≠ 生效
+
+`scripts/quickstart.sh`（macOS Desktop）把"装插件 → `app.asar` 让位 → 打补丁 → ad-hoc 重签 → 逐条校验"串成一条命令；`scripts/purge-align.mjs` 是可单独执行的实现（`align|status|revert|apply|sign`）。
+
+- **为什么必须对齐加载源**：Electron 优先加载 `Resources/app.asar`，补丁写在 `Resources/app/`。asar 在时补丁全空转、状态页仍显示已打——这是本插件历史上最容易误判的一条。
+- **判据只认两条**：`purge-align status` 的「加载源 = app 目录 + 零漂移」，以及进程 argv 指向 `Resources/app/dsh/...`。界面绿灯不是证据。
+- **重签是前提不是可选项**：改了 bundle 内容就必须 `codesign --force --deep --sign -`，否则 macOS 判 `damaged` 拒绝启动；代价是 DSH 自动更新失效、TCC 可能重授权，写进交付说明。
+- **升级路径**：`≤1.7.23 → 1.7.24+` 时，旧的权限补丁会留下"备份本身不干净"的现场，用 `--recover-legacy` 从同版本官方归档取回原文备份再继续；其它原因一律不猜、不自动修。
+- **失败要停**：解包校验、补丁应用、语法检查、重签任一失败都非零退出；不允许"部分成功报绿"。
+
 ## 9. 版本与兼容
 
 | 组件 | 值 |
 | --- | --- |
-| 插件 | `dsh-purge-community` 1.7.24 |
+| 插件 | `dsh-purge-community` 1.7.25 |
 | 已验证宿主 | DSH Desktop 0.2.2-rc.3 / 0.2.2-rc.2 / 0.2.2-rc.1 / 0.2.1-rc.1 / 0.2.1-rc.2 / 0.2.1-rc.3 / 0.2.1-rc.5 |
 | 0.2.2-rc.3 | 官方 rc.3 隔离副本 74 条补丁（本分支已移除 14 条权限补丁）/ 二次应用幂等；真实 Host Loader 预设注册通过。Windows rc.3 未复测补丁。 |
 | 其它宿主 | 允许应用，但 `selfcheck` 会标"未验证"；先看 `diagnose` |

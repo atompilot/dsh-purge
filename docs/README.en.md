@@ -8,7 +8,7 @@ A self-hosted add-on for DeepSeek Harness (known in the community as a 破甲 / 
 
 [![Release](https://img.shields.io/github/v/release/atompilot/dsh-purge?label=release)](https://github.com/atompilot/dsh-purge/releases)
 
-Current version 1.7.24 · targets **DSH Desktop 0.2.2-rc.3** (0.2.2-rc.1 / 0.2.1-rc.1 / rc.2 / rc.3 / rc.5 also pass)
+Current version 1.7.25 · targets **DSH Desktop 0.2.2-rc.3** (0.2.2-rc.1 / 0.2.1-rc.1 / rc.2 / rc.3 / rc.5 also pass)
 
 **Original project and author:** independently maintained from [dsh-purge by 小杨 / YuJunZhiXue](https://github.com/YuJunZhiXue/dsh-purge). The original repository is available again. Original attribution, copyright and the MIT license are retained; this community distribution is not an official upstream release.
 
@@ -50,6 +50,21 @@ People usually call this a 破甲 ("armor-breaking") or unrestrained-mode plugin
 
 Local learning, personal projects, automation experiments and maintenance work. Use it on machines you own or are authorized to work on; get permission before touching anyone else's systems.
 
+## One command (macOS Desktop, effective on install)
+
+Other paths only add the plugin to a profile. Electron loads `Resources/app.asar` first, while the patches are written into `Resources/app` — without switching the load source you get a green panel and zero effect. One command does all of it:
+
+```sh
+curl -fsSL "https://raw.githubusercontent.com/atompilot/dsh-purge/master/scripts/quickstart.sh" | sh
+```
+
+It installs the plugin (release SHA256 + snapshot), unpacks `app.asar` and moves it aside (the archive is backed up under `~/Library/Application Support/dsh-purge/asar-backup/`), applies the host patches, ad-hoc re-signs the bundle, verifies every patch, and prints the rollback command.
+
+- Quit DSH completely first (⌘Q). The script stops if the host process is still running.
+- Cost: DSH auto-update stops working (install official updates manually, then re-run this script), and TCC permissions may need to be granted again.
+- Inspect only: `… | sh -s -- --dry-run`; status: `… | sh -s -- --status`; roll back: `… | sh -s -- --revert`.
+- Upgrading from ≤1.7.23: add `--recover-legacy`, which restores a polluted `.dshpurge.bak` from the matching official archive before continuing.
+
 ## Install
 
 **Ask your agent** by copying this request:
@@ -70,7 +85,7 @@ Leave the npm registry at its working value. If pnpm requests `github.com/…/ya
 - CLI/Web users who already have `dsh` on PATH and use the `web` profile can use the official command below. Desktop users should not download another npx host to install into their existing desktop profile.
 
 ```sh
-dsh plugin --profile web add "https://github.com/atompilot/dsh-purge/releases/download/v1.7.24/dsh-purge-community-1.7.24.tgz"
+dsh plugin --profile web add "https://github.com/atompilot/dsh-purge/releases/download/v1.7.25/dsh-purge-community-1.7.25.tgz"
 ```
 
 Use the actual instance's profile and `DSH_HOME`. This project distributes via GitHub; do not substitute bare npm package names. The official command does not run our extra Release SHA256 check, migration snapshot or rollback wrapper.
@@ -93,7 +108,9 @@ A full page in the left sidebar: one line of state at the top, "Apply" as the pr
 
 On the development branch, the Purge composer undo button, setting, and slash command are retired. Legacy HTTP calls, draft restoration and existing conversation history remain supported. Use the undo entry supplied by your host or a separate plugin when available.
 
-1.7.24 removes the 14 permission/sandbox/approval host patches (74 remain) and leaves those boundaries to the host configuration, adding per-layer injection switches and per-session exclusion. See the [release notes](https://github.com/atompilot/dsh-purge/releases/tag/v1.7.24).
+1.7.25 ships the one-command quickstart (load-source alignment plus re-signing) and documents ACP clients (T3 Code and friends); the host patch set is still the 74 from 1.7.24. See the [release notes](https://github.com/atompilot/dsh-purge/releases/tag/v1.7.25).
+
+1.7.24 removed the 14 permission/sandbox/approval host patches (74 remain) and left those boundaries to the host configuration, adding per-layer injection switches and per-session exclusion.
 
 Two separate preferences (check / install), default check-only every six hours. Installing never restarts the app — you decide when to reopen it.
 
@@ -101,7 +118,7 @@ Two separate preferences (check / install), default check-only every six hours. 
 
 On DSH 0.2.2-rc.2 the 86 patches apply as 74 applied / 0 drift and selfcheck is ok on macOS; bypass gates and the minified rewind anchors were verified there. Windows coverage for this host build is limited to preset cards and startup diagnostics.
 
-Plugin `dsh-purge-community` 1.7.24 · verified on DSH Desktop 0.2.2-rc.3 / 0.2.2-rc.2 / 0.2.2-rc.1 / 0.2.1-rc.1 / rc.2 / rc.3 / rc.5 · Node ≥ 18.
+Plugin `dsh-purge-community` 1.7.25 · verified on DSH Desktop 0.2.2-rc.3 / 0.2.2-rc.2 / 0.2.2-rc.1 / 0.2.1-rc.1 / rc.2 / rc.3 / rc.5 · Node ≥ 18.
 
 Profiles: `desktop`, `web`, `acp`. An ACP client (T3 Code and friends) runs its own profile: the host patches are inherited from the same `Resources/app` tree, but the prompt injection must be installed into that profile. Setup and the post-update checklist: [ACP clients](maintenance-acp.md).
 

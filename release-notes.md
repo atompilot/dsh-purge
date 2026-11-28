@@ -1,3 +1,11 @@
+# 1.7.25
+
+一条命令装到位：`scripts/quickstart.sh` 把「装插件 → `app.asar` 让位 → 打补丁 → ad-hoc 重签 → 逐条校验」串起来，并补上 ACP 客户端（T3 Code 等）接入文档。宿主补丁仍是 1.7.24 的 74 条，不再变化。
+
+- 新增 `scripts/quickstart.sh` / `scripts/purge-align.mjs`：`align|status|revert|apply|sign`，幂等、可 dry-run、可回滚；`--recover-legacy` 用同版本官方归档修复被污染的 `.dshpurge.bak`（≤1.7.23 升级用）。
+- 新增 `docs/maintenance-acp.md` 与排障 §17：ACP profile 只继承宿主补丁，提示词注入要按 profile 单独装。
+- 文档：README 增加「方式零：一键脚本」，安装指南增加参数与边界表，AGENTS.md 增加 §8.5。
+
 # 1.7.24
 
 **破坏性变更**：移除 14 条权限 / 沙箱 / 审批宿主补丁（#292）。宿主补丁总数 88 → **74**。

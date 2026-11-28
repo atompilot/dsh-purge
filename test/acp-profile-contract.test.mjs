@@ -80,11 +80,14 @@ test('archive keeps the acp record and the release draft stays a draft', () => {
   assert.ok(archive.includes('](#v1-7-20-acp)'), '档案索引未指向 ACP 条目');
   assert.ok(archive.includes('maintenance-acp.md'), '档案未交叉引用 ACP 页面');
 
-  // 草稿跟着下一个版本号走：1.7.21 已被上游发行占用，ACP 补录的草稿顺延到 1.7.25。
-  const draft = read('docs/releases/1.7.25.md');
-  assert.ok(fs.statSync('docs/releases/1.7.25.md').size <= 8 * 1024, '发行摘要超过 8 KiB');
-  assert.ok(draft.includes('发版清单'), '草稿缺少发版清单');
-  // 草稿只有在版本号真 bump 之后才允许自称正式版；否则必须保留草稿标记。
-  const first = draft.split('\n')[0].trim();
-  assert.ok(first === `# ${pkg.version}` || first.includes('草稿'), `首行既不是当前版本也不是草稿：${first}`);
+  // ACP 补录的发行摘要跟着版本号走：1.7.21 被上游发行占用，顺延到 1.7.25。
+  const summaryPath = 'docs/releases/1.7.25.md';
+  const summary = read(summaryPath);
+  assert.ok(fs.statSync(summaryPath).size <= 8 * 1024, '发行摘要超过 8 KiB');
+  // 只有真 bump 到该版本后才允许自称正式版；没 bump 就必须保留草稿标记和发版清单。
+  const first = summary.split('\n')[0].trim();
+  const released = first === `# ${pkg.version}`;
+  assert.ok(released || first.includes('草稿'), `首行既不是当前版本也不是草稿：${first}`);
+  if (!released) assert.ok(summary.includes('发版清单'), '草稿缺少发版清单');
+  else assert.ok(summary.includes('一键脚本'), '正式发行摘要应包含本版主线：一键脚本');
 });

@@ -1,6 +1,6 @@
 # 安装、升级与故障排查
 
-当前版本 **1.7.24**。面向用户与协助安装的 Agent。支持的安装器环境：Linux CLI/Web；macOS Desktop；Windows 11 的 PowerShell 5.1/7。完整 Windows 宿主补丁及界面验收与安装器测试分开，不能因安装通过就宣称全部功能正常。
+当前版本 **1.7.25**。面向用户与协助安装的 Agent。支持的安装器环境：Linux CLI/Web；macOS Desktop；Windows 11 的 PowerShell 5.1/7。完整 Windows 宿主补丁及界面验收与安装器测试分开，不能因安装通过就宣称全部功能正常。
 
 ## 安装前
 
@@ -30,6 +30,46 @@ fi
 proot 显示的数字 UID 也可能经过映射，以 App 身份的实际读取结果为准。若报错是 `rename`，另核对错误中列出的父目录是否允许 App 写入和遍历。缺少某个可选目录本身不能证明权限有问题。保留原始路径和错误码，避免对整个 App 数据目录递归改权限。
 
 <a id="install-addresses"></a>
+
+<a id="quickstart"></a>
+
+## 一键脚本（macOS Desktop）：装上 = 生效
+
+其它安装方式只处理 profile 依赖。桌面版的补丁写在 `Resources/app/`，而 Electron 优先加载 `Resources/app.asar`——不把归档让位，补丁不会被执行，状态页却照样显示"已打"。`scripts/quickstart.sh` 把这条链固定成一条命令：
+
+```sh
+curl -fsSL "https://raw.githubusercontent.com/atompilot/dsh-purge/master/scripts/quickstart.sh" | sh
+```
+
+| 步骤 | 做什么 | 证据 |
+| --- | --- | --- |
+| 1 | 装插件（`bootstrap-install.mjs`：Release SHA256 + 快照 + 旧包迁移） | 安装日志里的版本与 `backup_id` |
+| 2 | `app.asar` 解包 → `Resources/app`，原归档改名为 `app.asar.bak` | `Resources/app.asar` 不存在、`app.asar.bak` 存在 |
+| 3 | 打宿主补丁（74 条） | 逐条状态：无 `drifted` / `partial` / `missing_file` / `pending` |
+| 4 | `codesign --force --deep --sign -` ad-hoc 重签并校验 | `codesign --verify --deep --strict` 通过 |
+| 5 | 打印验收与回滚命令 | `ps` 的 argv 含 `/Resources/app/dsh/` |
+
+参数（`curl … | sh -s -- <参数>`）：
+
+| 参数 | 作用 |
+| --- | --- |
+| `--dry-run` | 只打印计划，不写盘 |
+| `--status` | 只看状态，不写盘 |
+| `--revert` | 把 `app.asar.bak` 放回去（补丁留在目录里），并重签 |
+| `--version=X.Y.Z` | 固定发行版本，默认取最新发行 |
+| `--profile=NAME` | 装哪个 profile，桌面默认 `desktop` |
+| `--recover-legacy` | 从同版本官方归档取回被污染的 `.dshpurge.bak`（从 ≤1.7.23 升级时用） |
+| `--no-sign` | 跳过重签（只在明确知道后果时用） |
+
+边界，写进脚本也写在这里：
+
+- **必须先完整退出 DSH**。脚本检测到宿主进程在跑会直接停止，不会一边跑一边换包。
+- **重签的代价**：DSH 自动更新失效（以后手动装官方更新包，再重跑本脚本）；TCC 权限可能要重新授权；这两条不隐藏。
+- **不改的东西**：不卸载旧包（走 `bootstrap-install.mjs` 的迁移）、不改 npm 源、不关 TLS/SHA256、不自动重启宿主、不动用户提示词与更新偏好。
+- **失败即停**：解包校验失败、补丁失败、语法检查出错、重签失败都会非零退出，并把现场留给人工判断；不会"部分成功还报绿"。
+- **CLI/Web 没有这一层**：Linux/CLI 装完即用，本脚本只做安装（`--status` 会说明没有 asar 层）。
+
+手动等价动作见 [troubleshooting.md](troubleshooting.md) 与 [AGENTS.md](../AGENTS.md) 的宿主补丁章节；脚本实现是 `scripts/purge-align.mjs`（可单独跑 `align|status|revert|apply|sign`）。
 
 ## 安装窗口里的三个地址
 

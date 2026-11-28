@@ -9,9 +9,9 @@
 [![Release](https://img.shields.io/github/v/release/atompilot/dsh-purge?label=release)](https://github.com/atompilot/dsh-purge/releases)
 [![Checks](https://github.com/atompilot/dsh-purge/actions/workflows/community.yml/badge.svg)](https://github.com/atompilot/dsh-purge/actions/workflows/community.yml)
 
-当前版本 **1.7.24** · 适配 **DSH Desktop 0.2.2-rc.3**（0.2.2-rc.1 / 0.2.1-rc.1 / rc.2 / rc.3 / rc.5 同样通过） · [English](docs/README.en.md)
+当前版本 **1.7.25** · 适配 **DSH Desktop 0.2.2-rc.3**（0.2.2-rc.1 / 0.2.1-rc.1 / rc.2 / rc.3 / rc.5 同样通过） · [English](docs/README.en.md)
 
-1.7.24 移除 14 条权限/沙箱/审批补丁（宿主补丁 74 条），改由宿主配置承担边界，插件提供分层注入开关与会话排除。[发行说明](https://github.com/atompilot/dsh-purge/releases/tag/v1.7.24)。
+1.7.25 起提供一条命令装到位的一键脚本（含 `app.asar` 加载源对齐与重签），并补上 ACP 客户端（T3 Code 等）接入。宿主补丁仍是 1.7.24 的 74 条。[发行说明](https://github.com/atompilot/dsh-purge/releases/tag/v1.7.25)。
 
 **原项目与作者**：小杨 / YuJunZhiXue 是历史上游 dsh-purge 的作者署名。本仓库独立维护社区版，保留上游版权和 MIT 许可证。历史署名不代表对当前同名 GitHub 账号身份的核实。详见[署名记录](NOTICE.md)与[许可证](LICENSE)。
 
@@ -75,6 +75,24 @@ dsh-purge Community 是一个跑在你自己机器上的 Harness 附加组件。
 
 > 帮我把 https://github.com/atompilot/dsh-purge 的最新稳定版装到我正在用的 DSH。先读仓库 AGENTS.md 的安装章节，检查有没有旧版，有就保留设置原地迁移。装好告诉我实际版本和 profile，重启由我自己操作。
 
+### 方式零：一键脚本（macOS Desktop，装完即生效）
+
+其他方式只把插件装进 profile。桌面版 Electron 优先加载 `Resources/app.asar`，补丁却写在 `Resources/app`——不换加载源，就是"界面全绿、补丁全空转"。一条命令把三件事一起做完：
+
+```sh
+curl -fsSL "https://raw.githubusercontent.com/atompilot/dsh-purge/master/scripts/quickstart.sh" | sh
+```
+
+执行顺序：装插件（Release SHA256 校验 + 快照）→ 解包 `app.asar` 并让它让位（原归档备份到 `~/Library/Application Support/dsh-purge/asar-backup/`）→ 打补丁 → ad-hoc 重签 → 逐条校验，最后打印回滚命令。
+
+- **跑之前先完整退出 DSH**（⌘Q，不是关窗口）。检测到宿主进程还在跑，脚本会直接停下。
+- **代价**：重签会让 DSH 的自动更新失效（以后手动装更新包再重跑本脚本），TCC 权限可能要重新授权一次。
+- 只看不写：`curl -fsSL "…/scripts/quickstart.sh" | sh -s -- --dry-run`；只体检：`… | sh -s -- --status`；回滚：`… | sh -s -- --revert`。
+- 固定版本 / 非默认路径：`… | sh -s -- --version=1.7.25 --app="/Applications/DeepSeek Harness.app"`。
+- 想先读再跑：`curl -fSLO https://raw.githubusercontent.com/atompilot/dsh-purge/master/scripts/quickstart.sh && less quickstart.sh && sh quickstart.sh`。
+
+从 ≤1.7.23 升级上来的机器，旧版权限补丁留下了"备份本身不干净"的现场，勾一条：`… | sh -s -- --recover-legacy`，脚本会用同版本官方归档把那份备份换回原文再继续。
+
 ### 方式一：DSH 官方界面（首次安装）
 
 1. 打开 DSH 的「插件 → 发现 → 添加索引源」。如果没有「发现」，先到「插件 → 实验性插件 → 更多」启用「自定义插件市场」。
@@ -97,7 +115,7 @@ dsh-purge Community 是一个跑在你自己机器上的 Harness 附加组件。
 下面命令适用于**已经安装 `dsh` 命令、且使用 `web` profile 的 CLI/Web 用户**，在 macOS/Linux 终端或 Windows PowerShell 中运行。桌面版用户优先用上面的界面；不要为了安装插件再用 `npx` 下载另一套宿主。
 
 ```sh
-dsh plugin --profile web add "https://github.com/atompilot/dsh-purge/releases/download/v1.7.24/dsh-purge-community-1.7.24.tgz"
+dsh plugin --profile web add "https://github.com/atompilot/dsh-purge/releases/download/v1.7.25/dsh-purge-community-1.7.25.tgz"
 ```
 
 `web` 必须与实际启动的 profile 一致；自定义数据目录需要沿用该实例的 `DSH_HOME`。命令使用本次发行的固定版本 URL；不是 `npm install -g`，也不是安装裸 npm 包名。本项目通过 GitHub 发行，**不要替换成 `add dsh-purge` 或 `add dsh-purge-community`**。官方 CLI 的安装不会额外运行我们安装器的 Release SHA256 比对及迁移快照；需要这些功能时选方式三。[官方 CLI 安装说明](https://github.com/deepseek-ai/deepseek-harness/blob/master/docs/user/develop/basic/publish.zh.md)
@@ -218,7 +236,7 @@ Web 面板默认接受回环地址和宿主配置的监听地址。通过自有�
 
 | 组件 | 值 |
 | --- | --- |
-| 插件 | `dsh-purge-community` 1.7.24 |
+| 插件 | `dsh-purge-community` 1.7.25 |
 | 已验证宿主 | DSH Desktop 0.2.2-rc.3 / 0.2.2-rc.2 / 0.2.2-rc.1 / 0.2.1-rc.1 / 0.2.1-rc.2 / 0.2.1-rc.3 / 0.2.1-rc.5 |
 | 0.2.2-rc.2 | 补丁 74 applied / 零漂移，自检与破甲/回退回归在 macOS 通过；Windows 仅验证预设卡片与启动诊断，未复测补丁。 |
 | 其它宿主 | 允许安装，自检会标「未验证」；先看 `diagnose` |
