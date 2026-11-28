@@ -53,7 +53,7 @@ for arg do
     --version=*) VERSION="${arg#--version=}" ;;
     --profile=*) PROFILE_OVERRIDE="${arg#--profile=}" ;;
     --app=*) APP="${arg#--app=}" ;;
-    *) echo "未知参数：$arg（--help 看用法）" >&2; exit 3 ;;
+    *) echo "未知参数：${arg}（--help 看用法）" >&2; exit 3 ;;
   esac
 done
 
@@ -94,7 +94,7 @@ need_file() { # $1=文件名
 # ---- 桌面版：解析运行时 ----
 RUNTIME=""
 if [ "$MODE" = "desktop" ]; then
-  [ -d "$APP" ] || die "找不到 $APP（用 --app= 指定 .app 路径）"
+  [ -d "$APP" ] || die "找不到 ${APP}（用 --app= 指定 .app 路径）"
   PLIST="$APP/Contents/Info.plist"
   [ -f "$PLIST" ] || die "$APP 缺少 Info.plist，不是可用的桌面安装"
   EXE_NAME="$(/usr/bin/plutil -extract CFBundleExecutable raw -expect string -n -o - "$PLIST" 2>/dev/null || true)"
@@ -123,8 +123,9 @@ say "数据目录    $HOME_DIR"
 
 if [ "$ACTION" = "align" ]; then
   [ -f "$PLUGIN_JSON" ] || die "$PROFILE_DIR 还没有初始化。先打开一次 DSH 让它建好 profile（或用 --profile= 指定实际 profile）。"
-  if [ "$MODE" = "desktop" ] && pgrep -f "$APP/Contents/MacOS/" >/dev/null 2>&1; then
-    die "DSH 正在运行。先完整退出（⌘Q，不是关窗口），再跑本脚本；浏览器/终端窗口关掉不算。"
+  # --dry-run 只读，宿主在跑也允许先看计划；真正换包才必须退出。
+  if [ -z "$DRY_RUN" ] && [ "$MODE" = "desktop" ] && pgrep -f "$APP/Contents/MacOS/" >/dev/null 2>&1; then
+    die "DSH 正在运行。先完整退出（⌘Q，不是关窗口），再跑本脚本；只想看计划用 --dry-run。"
   fi
 fi
 
@@ -140,7 +141,8 @@ run_align() {
 
 # ---- 只有桌面版有 asar 层；status/revert 直接转发 ----
 if [ "$ACTION" = "status" ]; then
-  if [ "$MODE" = "desktop" ]; then run_align status; else say "CLI/Web 模式没有 asar 加载层，装完即用。"; fi
+  if [ "$MODE" = "desktop" ]; then run_align status; exit $?; fi
+  say "CLI/Web 模式没有 asar 加载层，装完即用。"
   exit 0
 fi
 if [ "$ACTION" = "revert" ]; then
@@ -160,12 +162,25 @@ read_installed() { # 桌面版不一定有 node，用宿主自带的 Electron �
 }
 INSTALLED="$(read_installed)"
 
+# 装上去的可能是版本号，也可能是 TGZ 地址；显示时还原成版本号，别把 URL 当版本。
+spec_version() {
+  case "$1" in
+    *dsh-purge-community-*.tgz) printf '%s\n' "$1" | sed -n 's#.*dsh-purge-community-\([0-9][0-9.]*\)\.tgz#\1#p' ;;
+    *) printf '%s\n' "$1" ;;
+  esac
+}
+INSTALLED_VERSION="$(spec_version "$INSTALLED")"
+
 if [ -n "$SKIP_INSTALL" ]; then
   say "插件        跳过安装（--skip-install）"
 elif [ -n "$INSTALLED" ] && [ -z "$VERSION" ]; then
-  say "插件        已装：dsh-purge-community $INSTALLED（要换版本用 --version=X.Y.Z）"
+  say "插件        已装：dsh-purge-community ${INSTALLED_VERSION}（要换版本用 --version=X.Y.Z）"
 else
-  say "插件        $([ -n "$INSTALLED" ] && echo "当前 $INSTALLED，改为 $VERSION" || echo "未安装，开始安装")"
+  if [ -n "$INSTALLED" ]; then
+    say "插件        当前 ${INSTALLED_VERSION} → 目标 ${VERSION}"
+  else
+    say "插件        未安装，开始安装 ${VERSION:-最新发行}"
+  fi
   BOOTSTRAP="$(need_file bootstrap-install.mjs)"
   if [ -n "$DRY_RUN" ]; then
     say "            [dry-run] 跳过安装"
@@ -192,7 +207,7 @@ set -e
 
 say ""
 if [ -n "$DRY_RUN" ]; then
-  say "↑ 以上是计划，没有写盘。去掉 --dry-run 才会真正执行。"
+  say "去掉 --dry-run 才会真正执行。"
   exit $RC
 fi
 say "下一步：重新打开 DSH。验收两条："
