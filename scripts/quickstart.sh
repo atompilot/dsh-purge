@@ -105,8 +105,15 @@ if [ "$MODE" = "desktop" ]; then
   [ -x "$RUNTIME" ] || die "找不到可执行文件：$RUNTIME"
 fi
 
-PROFILE="${PROFILE_OVERRIDE:-${PURGE_PROFILE:-$([ "$MODE" = "desktop" ] && echo desktop || echo web)}}"
 HOME_DIR="${DSH_HOME:-$HOME/.dsh}"
+# 默认 profile 按"哪个真的初始化过"选：新桌面壳可能用 web，旧 Desktop CLI 用 desktop。
+# 猜错会把插件装进一个宿主根本不加载的 profile，所以只在两侧都有/都没有时才回落到 desktop。
+DEFAULT_PROFILE="web"
+[ "$MODE" = "desktop" ] && DEFAULT_PROFILE="desktop"
+if [ "$MODE" = "desktop" ] && [ ! -f "$HOME_DIR/profiles/desktop/package.json" ] && [ -f "$HOME_DIR/profiles/web/package.json" ]; then
+  DEFAULT_PROFILE="web"
+fi
+PROFILE="${PROFILE_OVERRIDE:-${PURGE_PROFILE:-$DEFAULT_PROFILE}}"
 PROFILE_DIR="$HOME_DIR/profiles/$PROFILE"
 PLUGIN_JSON="$PROFILE_DIR/package.json"
 
