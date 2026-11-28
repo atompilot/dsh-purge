@@ -12,6 +12,8 @@ const read = (file) => fs.readFileSync(file, 'utf8');
 test('quickstart and align scripts exist and are executable', () => {
   for (const file of ['scripts/quickstart.sh', 'scripts/purge-align.mjs']) {
     assert.ok(fs.existsSync(file), `缺少 ${file}`);
+    // Windows 检出不留执行位（git 也不跟踪它），这一条只在 POSIX 上成立。
+    if (process.platform === 'win32') continue;
     const mode = fs.statSync(file).mode & 0o777;
     assert.ok(mode & 0o100, `${file} 需要可执行位（当前 ${mode.toString(8)}）`);
   }
